@@ -57,6 +57,10 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User save(User user) {
         log.info("Saving user with name: " + user.getName());
+        if (userRepository.findUserByName(user.getName()).isPresent()) {
+            //impl exception handling
+            throw new RuntimeException();
+        }
         return userRepository.save(user);
     }
 
@@ -65,19 +69,17 @@ public class UserServiceImpl implements UserService {
     public User update(User user) {
         log.info("Updating user with ID = " + user.getId());
         User userByID = findByID(user.getId());
+        if (!userByID.getName().equals(user.getName()) &&
+                userRepository.findUserByName(user.getName()).isPresent()) {
+            //impl exception handling
+            throw new RuntimeException();
+        }
         userByID.setName(user.getName());
         userByID.setEmail(user.getEmail());
         userByID.setGender(user.getGender());
         userByID.setModerator(user.isModerator());
         userByID.setPhoneNumber(user.getPhoneNumber());
         return userByID;
-    }
-
-    @Override
-    @Transactional
-    public void delete(User user) {
-        log.info("Deleting user with ID = " + user.getId() + " and name \"" + user.getName() + "\"");
-        userRepository.delete(user);
     }
 
     @Override

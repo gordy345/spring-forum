@@ -32,6 +32,7 @@ public class CommentServiceImpl implements CommentService {
             //todo add exception handling
             throw new RuntimeException();
         }
+        comments.forEach(comment -> comment.setPost(post));
         return comments;
     }
 
@@ -39,11 +40,13 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public Comment findByID(Long id) {
         Optional<Comment> commentOptional = commentRepository.findById(id);
-        if(commentOptional.isEmpty()) {
+        if (commentOptional.isEmpty()) {
             //todo add exception handling
             throw new RuntimeException();
         }
-        return commentOptional.get();
+        Comment comment = commentOptional.get();
+        comment.setPost(comment.getPost());
+        return comment;
     }
 
     @Override
@@ -59,14 +62,9 @@ public class CommentServiceImpl implements CommentService {
         log.info("Updating comment with ID = " + comment.getId());
         Comment commentByID = findByID(comment.getId());
         commentByID.setText(comment.getText());
+        commentByID.setPost(comment.getPost());
+        commentByID.setCommentOwner(comment.getCommentOwner());
         return commentByID;
-    }
-
-    @Override
-    @Transactional
-    public void delete(Comment comment) {
-        log.info("Deleting comment with ID = " + comment.getId());
-        commentRepository.delete(comment);
     }
 
     @Override

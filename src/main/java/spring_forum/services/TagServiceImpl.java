@@ -28,7 +28,7 @@ public class TagServiceImpl implements TagService {
         Post post = postService.findByID(postID);
         log.info("Finding tags for post with ID = " + postID);
         Set<Tag> tags = post.getTags();
-        if(tags.size() == 0) {
+        if (tags.size() == 0) {
             //todo impl exception handling
             throw new RuntimeException();
         }
@@ -39,7 +39,7 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public Tag findByID(Long id) {
         Optional<Tag> tagOptional = tagRepository.findById(id);
-        if(tagOptional.isEmpty()) {
+        if (tagOptional.isEmpty()) {
             //todo impl exception handling
             throw new RuntimeException();
         }
@@ -50,6 +50,10 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public Tag save(Tag tag) {
         log.info("Saving tag: " + tag.getTag());
+        if (tag.getPost().getTags().contains(Tag.builder().tag(tag.getTag()).build())) {
+            //todo impl exception handling
+            throw new RuntimeException();
+        }
         return tagRepository.save(tag);
     }
 
@@ -58,15 +62,13 @@ public class TagServiceImpl implements TagService {
     public Tag update(Tag tag) {
         log.info("Updating tag with ID = " + tag.getId());
         Tag tagByID = findByID(tag.getId());
+        if (tag.getPost().getTags().contains(Tag.builder().tag(tag.getTag()).build())) {
+            //todo impl exception handling
+            throw new RuntimeException();
+        }
         tagByID.setTag(tag.getTag());
+        tagByID.setPost(tag.getPost());
         return tagByID;
-    }
-
-    @Override
-    @Transactional
-    public void delete(Tag tag) {
-        log.info("Deleting tag with ID = " + tag.getId());
-        tagRepository.delete(tag);
     }
 
     @Override

@@ -17,14 +17,14 @@ public class UserDTO extends BaseDTO {
 
     private String email;
 
-    private Boolean isModerator;
+    private boolean isModerator;
 
     private Gender gender;
 
     private String phoneNumber;
 
     @Builder
-    public UserDTO(Long id, String name, String email, Boolean isModerator, Gender gender, String phoneNumber) {
+    public UserDTO(Long id, String name, String email, boolean isModerator, Gender gender, String phoneNumber) {
         super(id);
         this.name = name;
         this.email = email;
@@ -38,9 +38,9 @@ public class UserDTO extends BaseDTO {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UserDTO userDTO = (UserDTO) o;
-        return Objects.equals(name, userDTO.name) &&
+        return isModerator == userDTO.isModerator &&
+                Objects.equals(name, userDTO.name) &&
                 Objects.equals(email, userDTO.email) &&
-                Objects.equals(isModerator, userDTO.isModerator) &&
                 gender == userDTO.gender &&
                 Objects.equals(phoneNumber, userDTO.phoneNumber);
     }

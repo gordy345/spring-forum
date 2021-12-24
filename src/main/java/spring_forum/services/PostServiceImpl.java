@@ -89,6 +89,10 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Post save(Post post) {
         log.info("Saving post with title: " + post.getTitle());
+        if (postRepository.findPostByTitle(post.getTitle()).isPresent()) {
+            //impl exceptions handling
+            throw new RuntimeException();
+        }
         return postRepository.save(post);
     }
 
@@ -97,16 +101,14 @@ public class PostServiceImpl implements PostService {
     public Post update(Post post) {
         log.info("Updating post with ID = " + post.getId());
         Post postByID = findByID(post.getId());
+        if (!postByID.getTitle().equals(post.getTitle()) &&
+                postRepository.findPostByTitle(post.getTitle()).isPresent()) {
+            //impl exceptions handling
+            throw new RuntimeException();
+        }
         postByID.setTitle(post.getTitle());
         postByID.setText(post.getText());
         return postByID;
-    }
-
-    @Override
-    @Transactional
-    public void delete(Post post) {
-        log.info("Deleting post with ID = " + post.getId());
-        postRepository.delete(post);
     }
 
     @Override
@@ -116,6 +118,5 @@ public class PostServiceImpl implements PostService {
         log.info("Deleting post with ID = " + id);
         postRepository.delete(post);
     }
-
 
 }
