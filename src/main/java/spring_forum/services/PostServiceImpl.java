@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import spring_forum.domain.Post;
 import spring_forum.domain.Tag;
 import spring_forum.domain.User;
+import spring_forum.exceptions.ExistsException;
+import spring_forum.exceptions.NotFoundException;
 import spring_forum.repositories.PostRepository;
 
 import javax.transaction.Transactional;
@@ -31,6 +33,9 @@ public class PostServiceImpl implements PostService {
         log.info("Finding all posts");
         Set<Post> posts = new LinkedHashSet<>();
         postRepository.findAll().forEach(posts::add);
+        if (posts.size() == 0) {
+            throw new NotFoundException("There are no posts now.");
+        }
         return posts;
     }
 
@@ -42,7 +47,7 @@ public class PostServiceImpl implements PostService {
         Set<Post> posts = user.getPosts();
         if (posts.size() == 0) {
             // todo add exceptions handling
-            throw new RuntimeException();
+            throw new NotFoundException("There are no posts for this user.");
         }
         return posts;
     }
@@ -56,7 +61,7 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toSet());
         if (posts.size() == 0) {
             // todo add exceptions handling
-            throw new RuntimeException();
+            throw new NotFoundException("There are no posts with this tag.");
         }
         return posts;
     }
@@ -66,9 +71,9 @@ public class PostServiceImpl implements PostService {
     public Post findPostByTitle(String title) {
         log.info("Finding post with title: " + title);
         Optional<Post> postOptional = postRepository.findPostByTitle(title);
-        if(postOptional.isEmpty()) {
+        if (postOptional.isEmpty()) {
             // todo add exceptions handling
-            throw new RuntimeException();
+            throw new NotFoundException("Post with title \"" + title + "\" doesn't exist.");
         }
         return postOptional.get();
     }
@@ -78,9 +83,9 @@ public class PostServiceImpl implements PostService {
     public Post findByID(Long id) {
         log.info("Finding post with ID = " + id);
         Optional<Post> postOptional = postRepository.findById(id);
-        if(postOptional.isEmpty()) {
+        if (postOptional.isEmpty()) {
             // todo add exceptions handling
-            throw new RuntimeException();
+            throw new NotFoundException("There is no post with ID = " + id);
         }
         return postOptional.get();
     }
@@ -91,7 +96,7 @@ public class PostServiceImpl implements PostService {
         log.info("Saving post with title: " + post.getTitle());
         if (postRepository.findPostByTitle(post.getTitle()).isPresent()) {
             //impl exceptions handling
-            throw new RuntimeException();
+            throw new ExistsException("Post with title \"" + post.getTitle() + "\" already exists.");
         }
         return postRepository.save(post);
     }
@@ -104,7 +109,7 @@ public class PostServiceImpl implements PostService {
         if (!postByID.getTitle().equals(post.getTitle()) &&
                 postRepository.findPostByTitle(post.getTitle()).isPresent()) {
             //impl exceptions handling
-            throw new RuntimeException();
+            throw new ExistsException("Post with title \"" + post.getTitle() + "\" already exists.");
         }
         postByID.setTitle(post.getTitle());
         postByID.setText(post.getText());
@@ -114,8 +119,8 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void deleteByID(Long id) {
-        Post post = findByID(id);
         log.info("Deleting post with ID = " + id);
+        Post post = findByID(id);
         postRepository.delete(post);
     }
 

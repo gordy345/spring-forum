@@ -3,6 +3,8 @@ package spring_forum.services;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.User;
+import spring_forum.exceptions.ExistsException;
+import spring_forum.exceptions.NotFoundException;
 import spring_forum.repositories.UserRepository;
 
 import javax.transaction.Transactional;
@@ -26,6 +28,9 @@ public class UserServiceImpl implements UserService {
         log.info("Finding all users.");
         Set<User> users = new LinkedHashSet<>();
         userRepository.findAll().forEach(users::add);
+        if (users.size() == 0) {
+            throw new NotFoundException("There are no users now.");
+        }
         return users;
     }
 
@@ -36,7 +41,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.findUserByName(name);
         if(userOptional.isEmpty()) {
             // todo add exceptions handling
-            throw new RuntimeException();
+            throw new NotFoundException("User \"" + name + "\" doesn't exist.");
         }
         return userOptional.get();
     }
@@ -48,7 +53,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isEmpty()) {
             // todo add exceptions handling
-            throw new RuntimeException();
+            throw new NotFoundException("User with ID = " + id + " doesn't exist.");
         }
         return userOptional.get();
     }
@@ -59,7 +64,7 @@ public class UserServiceImpl implements UserService {
         log.info("Saving user with name: " + user.getName());
         if (userRepository.findUserByName(user.getName()).isPresent()) {
             //impl exception handling
-            throw new RuntimeException();
+            throw new ExistsException("User with name \"" + user.getName() + "\" already exists.");
         }
         return userRepository.save(user);
     }
@@ -72,7 +77,7 @@ public class UserServiceImpl implements UserService {
         if (!userByID.getName().equals(user.getName()) &&
                 userRepository.findUserByName(user.getName()).isPresent()) {
             //impl exception handling
-            throw new RuntimeException();
+            throw new ExistsException("User with name \"" + user.getName() + "\" already exists.");
         }
         userByID.setName(user.getName());
         userByID.setEmail(user.getEmail());

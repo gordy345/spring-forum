@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.Comment;
 import spring_forum.domain.Post;
+import spring_forum.exceptions.NotFoundException;
 import spring_forum.repositories.CommentRepository;
 
 import javax.transaction.Transactional;
@@ -30,7 +31,7 @@ public class CommentServiceImpl implements CommentService {
         Set<Comment> comments = post.getComments();
         if(comments.size() == 0) {
             //todo add exception handling
-            throw new RuntimeException();
+            throw new NotFoundException("There are no comments for this post.");
         }
         comments.forEach(comment -> comment.setPost(post));
         return comments;
@@ -42,7 +43,7 @@ public class CommentServiceImpl implements CommentService {
         Optional<Comment> commentOptional = commentRepository.findById(id);
         if (commentOptional.isEmpty()) {
             //todo add exception handling
-            throw new RuntimeException();
+            throw new NotFoundException("Comment with ID = " + id + " doesn't exist.");
         }
         Comment comment = commentOptional.get();
         comment.setPost(comment.getPost());

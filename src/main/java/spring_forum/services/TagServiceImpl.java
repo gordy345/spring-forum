@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.Post;
 import spring_forum.domain.Tag;
+import spring_forum.exceptions.ExistsException;
+import spring_forum.exceptions.NotFoundException;
 import spring_forum.repositories.TagRepository;
 
 import javax.transaction.Transactional;
@@ -30,7 +32,7 @@ public class TagServiceImpl implements TagService {
         Set<Tag> tags = post.getTags();
         if (tags.size() == 0) {
             //todo impl exception handling
-            throw new RuntimeException();
+            throw new NotFoundException("There are no tags for this post.");
         }
         return tags;
     }
@@ -41,7 +43,7 @@ public class TagServiceImpl implements TagService {
         Optional<Tag> tagOptional = tagRepository.findById(id);
         if (tagOptional.isEmpty()) {
             //todo impl exception handling
-            throw new RuntimeException();
+            throw new NotFoundException("Tag with ID = " + id + " doesn't exist.");
         }
         return tagOptional.get();
     }
@@ -52,7 +54,8 @@ public class TagServiceImpl implements TagService {
         log.info("Saving tag: " + tag.getTag());
         if (tag.getPost().getTags().contains(Tag.builder().tag(tag.getTag()).build())) {
             //todo impl exception handling
-            throw new RuntimeException();
+            throw new ExistsException("Tag you're trying to save already exists for post with ID = "
+                    + tag.getPost().getId());
         }
         return tagRepository.save(tag);
     }
@@ -64,7 +67,8 @@ public class TagServiceImpl implements TagService {
         Tag tagByID = findByID(tag.getId());
         if (tag.getPost().getTags().contains(Tag.builder().tag(tag.getTag()).build())) {
             //todo impl exception handling
-            throw new RuntimeException();
+            throw new ExistsException("Tag you're trying to save already exists for post with ID = "
+                    + tag.getPost().getId());
         }
         tagByID.setTag(tag.getTag());
         tagByID.setPost(tag.getPost());
