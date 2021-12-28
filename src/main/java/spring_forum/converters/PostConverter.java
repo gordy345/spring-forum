@@ -8,6 +8,7 @@ import spring_forum.dtos.PostDTO;
 public class PostConverter {
 
     public PostDTO convertToPostDTO(Post post) {
+        if (post == null) return null;
         return PostDTO.builder()
                 .id(post.getId())
                 .title(post.getTitle())
@@ -17,6 +18,7 @@ public class PostConverter {
     }
 
     public Post convertToPost(PostDTO postDTO) {
+        if (postDTO == null) return null;
         return Post.builder()
                 .id(postDTO.getId())
                 .title(postDTO.getTitle())

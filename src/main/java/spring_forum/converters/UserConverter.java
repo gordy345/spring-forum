@@ -8,6 +8,7 @@ import spring_forum.dtos.UserDTO;
 public class UserConverter {
 
     public UserDTO convertToUserDTO(User user) {
+        if (user == null) return null;
         return UserDTO.builder()
                 .id(user.getId())
                 .name(user.getName())
@@ -19,6 +20,7 @@ public class UserConverter {
     }
 
     public User convertToUser(UserDTO userDTO) {
+        if (userDTO == null) return null;
         return User.builder()
                 .id(userDTO.getId())
                 .name(userDTO.getName())

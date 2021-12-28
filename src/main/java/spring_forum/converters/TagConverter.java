@@ -8,6 +8,7 @@ import spring_forum.dtos.TagDTO;
 public class TagConverter {
 
     public TagDTO convertToTagDTO(Tag tag) {
+        if (tag == null) return null;
         return TagDTO.builder()
                 .id(tag.getId())
                 .tag(tag.getTag())
@@ -16,6 +17,7 @@ public class TagConverter {
     }
 
     public Tag convertToTag(TagDTO tagDTO) {
+        if (tagDTO == null) return null;
         return Tag.builder()
                 .id(tagDTO.getId())
                 .tag(tagDTO.getTag())
