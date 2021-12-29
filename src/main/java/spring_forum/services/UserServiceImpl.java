@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User findByID(Long id) {
-        log.info("Finding user by ID = " + id);
+        log.info("Finding user with ID = " + id);
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isEmpty()) {
             // todo add exceptions handling

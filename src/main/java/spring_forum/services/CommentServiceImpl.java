@@ -33,13 +33,13 @@ public class CommentServiceImpl implements CommentService {
             //todo add exception handling
             throw new NotFoundException("There are no comments for this post.");
         }
-        comments.forEach(comment -> comment.setPost(post));
         return comments;
     }
 
     @Override
     @Transactional
     public Comment findByID(Long id) {
+        log.info("Finding comment with ID = " + id);
         Optional<Comment> commentOptional = commentRepository.findById(id);
         if (commentOptional.isEmpty()) {
             //todo add exception handling

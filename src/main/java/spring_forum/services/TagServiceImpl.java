@@ -40,6 +40,7 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional
     public Tag findByID(Long id) {
+        log.info("Finding tag with ID = " + id);
         Optional<Tag> tagOptional = tagRepository.findById(id);
         if (tagOptional.isEmpty()) {
             //todo impl exception handling
@@ -52,7 +53,7 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public Tag save(Tag tag) {
         log.info("Saving tag: " + tag.getTag());
-        if (tag.getPost().getTags().contains(Tag.builder().tag(tag.getTag()).build())) {
+        if (tag.getPost().getTags().contains(tag)) {
             //todo impl exception handling
             throw new ExistsException("Tag you're trying to save already exists for post with ID = "
                     + tag.getPost().getId());
@@ -65,7 +66,7 @@ public class TagServiceImpl implements TagService {
     public Tag update(Tag tag) {
         log.info("Updating tag with ID = " + tag.getId());
         Tag tagByID = findByID(tag.getId());
-        if (tag.getPost().getTags().contains(Tag.builder().tag(tag.getTag()).build())) {
+        if (tag.getPost().getTags().contains(tag)) {
             //todo impl exception handling
             throw new ExistsException("Tag you're trying to save already exists for post with ID = "
                     + tag.getPost().getId());
