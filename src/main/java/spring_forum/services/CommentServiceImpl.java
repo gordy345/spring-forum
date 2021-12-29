@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import spring_forum.domain.Comment;
 import spring_forum.domain.Post;
 import spring_forum.exceptions.NotFoundException;
+import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.CommentRepository;
 
 import javax.transaction.Transactional;
@@ -17,10 +18,12 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
     private final PostService postService;
+    private final Producer producer;
 
-    public CommentServiceImpl(CommentRepository commentRepository, PostService postService) {
+    public CommentServiceImpl(CommentRepository commentRepository, PostService postService, Producer producer) {
         this.commentRepository = commentRepository;
         this.postService = postService;
+        this.producer = producer;
     }
 
     @Override
@@ -30,8 +33,9 @@ public class CommentServiceImpl implements CommentService {
         log.info("Finding comments for post with ID = " + postID);
         Set<Comment> comments = post.getComments();
         if(comments.size() == 0) {
-            //todo add exception handling
-            throw new NotFoundException("There are no comments for this post.");
+            String message = "There are no comments for this post.";
+            producer.send(message);
+            throw new NotFoundException(message);
         }
         return comments;
     }
@@ -42,12 +46,12 @@ public class CommentServiceImpl implements CommentService {
         log.info("Finding comment with ID = " + id);
         Optional<Comment> commentOptional = commentRepository.findById(id);
         if (commentOptional.isEmpty()) {
-            //todo add exception handling
-            throw new NotFoundException("Comment with ID = " + id + " doesn't exist.");
+            String message = "Comment with ID = " + id + " doesn't exist.";
+            producer.send(message);
+            throw new NotFoundException(message);
         }
-        Comment comment = commentOptional.get();
-        comment.setPost(comment.getPost());
-        return comment;
+        //        comment.setPost(comment.getPost());
+        return commentOptional.get();
     }
 
     @Override

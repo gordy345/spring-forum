@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import spring_forum.domain.User;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
+import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.UserRepository;
 
 import javax.transaction.Transactional;
@@ -17,9 +18,11 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final Producer producer;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, Producer producer) {
         this.userRepository = userRepository;
+        this.producer = producer;
     }
 
     @Override
@@ -29,7 +32,9 @@ public class UserServiceImpl implements UserService {
         Set<User> users = new LinkedHashSet<>();
         userRepository.findAll().forEach(users::add);
         if (users.size() == 0) {
-            throw new NotFoundException("There are no users now.");
+            String message = "There are no users now.";
+            producer.send(message);
+            throw new NotFoundException(message);
         }
         return users;
     }
@@ -40,8 +45,9 @@ public class UserServiceImpl implements UserService {
         log.info("Finding user by name: " + name);
         Optional<User> userOptional = userRepository.findUserByName(name);
         if(userOptional.isEmpty()) {
-            // todo add exceptions handling
-            throw new NotFoundException("User \"" + name + "\" doesn't exist.");
+            String message = "User \"" + name + "\" doesn't exist.";
+            producer.send(message);
+            throw new NotFoundException(message);
         }
         return userOptional.get();
     }
@@ -52,8 +58,9 @@ public class UserServiceImpl implements UserService {
         log.info("Finding user with ID = " + id);
         Optional<User> userOptional = userRepository.findById(id);
         if(userOptional.isEmpty()) {
-            // todo add exceptions handling
-            throw new NotFoundException("User with ID = " + id + " doesn't exist.");
+            String message = "User with ID = " + id + " doesn't exist.";
+            producer.send(message);
+            throw new NotFoundException(message);
         }
         return userOptional.get();
     }
@@ -63,7 +70,6 @@ public class UserServiceImpl implements UserService {
     public User save(User user) {
         log.info("Saving user with name: " + user.getName());
         if (userRepository.findUserByName(user.getName()).isPresent()) {
-            //impl exception handling
             throw new ExistsException("User with name \"" + user.getName() + "\" already exists.");
         }
         return userRepository.save(user);
@@ -76,7 +82,6 @@ public class UserServiceImpl implements UserService {
         User userByID = findByID(user.getId());
         if (!userByID.getName().equals(user.getName()) &&
                 userRepository.findUserByName(user.getName()).isPresent()) {
-            //impl exception handling
             throw new ExistsException("User with name \"" + user.getName() + "\" already exists.");
         }
         userByID.setName(user.getName());

@@ -7,6 +7,7 @@ import spring_forum.domain.Tag;
 import spring_forum.domain.User;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
+import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.PostRepository;
 
 import javax.transaction.Transactional;
@@ -21,10 +22,12 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final UserService userService;
+    private final Producer producer;
 
-    public PostServiceImpl(PostRepository postRepository, UserService userService) {
+    public PostServiceImpl(PostRepository postRepository, UserService userService, Producer producer) {
         this.postRepository = postRepository;
         this.userService = userService;
+        this.producer = producer;
     }
 
     @Override
@@ -34,7 +37,9 @@ public class PostServiceImpl implements PostService {
         Set<Post> posts = new LinkedHashSet<>();
         postRepository.findAll().forEach(posts::add);
         if (posts.size() == 0) {
-            throw new NotFoundException("There are no posts now.");
+            String message = "There are no posts now.";
+            producer.send(message);
+            throw new NotFoundException(message);
         }
         return posts;
     }
@@ -46,8 +51,9 @@ public class PostServiceImpl implements PostService {
         User user = userService.findByID(userId);
         Set<Post> posts = user.getPosts();
         if (posts.size() == 0) {
-            // todo add exceptions handling
-            throw new NotFoundException("There are no posts for this user.");
+            String message = "There are no posts for this user.";
+            producer.send(message);
+            throw new NotFoundException(message);
         }
         return posts;
     }
@@ -60,8 +66,9 @@ public class PostServiceImpl implements PostService {
                 .filter(post -> post.getTags().contains(Tag.builder().tag(tag).build()))
                 .collect(Collectors.toSet());
         if (posts.size() == 0) {
-            // todo add exceptions handling
-            throw new NotFoundException("There are no posts with this tag.");
+            String message = "There are no posts with this tag.";
+            producer.send(message);
+            throw new NotFoundException(message);
         }
         return posts;
     }
@@ -72,8 +79,9 @@ public class PostServiceImpl implements PostService {
         log.info("Finding post with title: " + title);
         Optional<Post> postOptional = postRepository.findPostByTitle(title);
         if (postOptional.isEmpty()) {
-            // todo add exceptions handling
-            throw new NotFoundException("Post with title \"" + title + "\" doesn't exist.");
+            String message = "Post with title \"" + title + "\" doesn't exist.";
+            producer.send(message);
+            throw new NotFoundException(message);
         }
         return postOptional.get();
     }
@@ -84,8 +92,9 @@ public class PostServiceImpl implements PostService {
         log.info("Finding post with ID = " + id);
         Optional<Post> postOptional = postRepository.findById(id);
         if (postOptional.isEmpty()) {
-            // todo add exceptions handling
-            throw new NotFoundException("There is no post with ID = " + id);
+            String message = "There is no post with ID = " + id;
+            producer.send(message);
+            throw new NotFoundException(message);
         }
         return postOptional.get();
     }
@@ -95,7 +104,6 @@ public class PostServiceImpl implements PostService {
     public Post save(Post post) {
         log.info("Saving post with title: " + post.getTitle());
         if (postRepository.findPostByTitle(post.getTitle()).isPresent()) {
-            //impl exceptions handling
             throw new ExistsException("Post with title \"" + post.getTitle() + "\" already exists.");
         }
         return postRepository.save(post);
@@ -108,7 +116,6 @@ public class PostServiceImpl implements PostService {
         Post postByID = findByID(post.getId());
         if (!postByID.getTitle().equals(post.getTitle()) &&
                 postRepository.findPostByTitle(post.getTitle()).isPresent()) {
-            //impl exceptions handling
             throw new ExistsException("Post with title \"" + post.getTitle() + "\" already exists.");
         }
         postByID.setTitle(post.getTitle());

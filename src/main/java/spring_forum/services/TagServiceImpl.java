@@ -6,6 +6,7 @@ import spring_forum.domain.Post;
 import spring_forum.domain.Tag;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
+import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.TagRepository;
 
 import javax.transaction.Transactional;
@@ -18,10 +19,12 @@ public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
     private final PostService postService;
+    private final Producer producer;
 
-    public TagServiceImpl(TagRepository tagRepository, PostService postService) {
+    public TagServiceImpl(TagRepository tagRepository, PostService postService, Producer producer) {
         this.tagRepository = tagRepository;
         this.postService = postService;
+        this.producer = producer;
     }
 
     @Override
@@ -31,8 +34,9 @@ public class TagServiceImpl implements TagService {
         log.info("Finding tags for post with ID = " + postID);
         Set<Tag> tags = post.getTags();
         if (tags.size() == 0) {
-            //todo impl exception handling
-            throw new NotFoundException("There are no tags for this post.");
+            String message = "There are no tags for this post.";
+            producer.send(message);
+            throw new NotFoundException(message);
         }
         return tags;
     }
@@ -43,8 +47,9 @@ public class TagServiceImpl implements TagService {
         log.info("Finding tag with ID = " + id);
         Optional<Tag> tagOptional = tagRepository.findById(id);
         if (tagOptional.isEmpty()) {
-            //todo impl exception handling
-            throw new NotFoundException("Tag with ID = " + id + " doesn't exist.");
+            String message = "Tag with ID = " + id + " doesn't exist.";
+            producer.send(message);
+            throw new NotFoundException(message);
         }
         return tagOptional.get();
     }
@@ -54,7 +59,6 @@ public class TagServiceImpl implements TagService {
     public Tag save(Tag tag) {
         log.info("Saving tag: " + tag.getTag());
         if (tag.getPost().getTags().contains(tag)) {
-            //todo impl exception handling
             throw new ExistsException("Tag you're trying to save already exists for post with ID = "
                     + tag.getPost().getId());
         }
@@ -67,7 +71,6 @@ public class TagServiceImpl implements TagService {
         log.info("Updating tag with ID = " + tag.getId());
         Tag tagByID = findByID(tag.getId());
         if (tag.getPost().getTags().contains(tag)) {
-            //todo impl exception handling
             throw new ExistsException("Tag you're trying to save already exists for post with ID = "
                     + tag.getPost().getId());
         }
