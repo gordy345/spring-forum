@@ -1,4 +1,4 @@
-package spring_forum.users;
+package spring_forum.controllers.users;
 
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;

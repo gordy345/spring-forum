@@ -1,4 +1,4 @@
-package spring_forum.tags;
+package spring_forum.controllers.tags;
 
 
 import io.restassured.http.ContentType;

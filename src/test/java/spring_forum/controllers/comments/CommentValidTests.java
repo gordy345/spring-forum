@@ -1,4 +1,4 @@
-package spring_forum.comments;
+package spring_forum.controllers.comments;
 
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;

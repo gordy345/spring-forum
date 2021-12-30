@@ -1,4 +1,4 @@
-package spring_forum.posts;
+package spring_forum.controllers.posts;
 
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
