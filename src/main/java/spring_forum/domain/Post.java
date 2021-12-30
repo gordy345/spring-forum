@@ -37,7 +37,7 @@ public class Post extends BaseEntity {
 
     @Builder
     public Post(Long id, String title, String text, User postOwner, Set<Tag> tags, Set<Comment> comments) {
-        super(id);
+        super(id, 0L);
         this.title = title;
         this.text = text;
         this.postOwner = postOwner;

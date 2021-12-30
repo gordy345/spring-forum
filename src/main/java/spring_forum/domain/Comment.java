@@ -30,7 +30,7 @@ public class Comment extends BaseEntity {
 
     @Builder
     public Comment(Long id, String text, User commentOwner, Post post) {
-        super(id);
+        super(id, 0L);
         this.text = text;
         if (commentOwner != null) {
             this.commentOwner = commentOwner;

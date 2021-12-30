@@ -25,7 +25,7 @@ public class Tag extends BaseEntity {
 
     @Builder
     public Tag(Long id, String tag, Post post) {
-        super(id);
+        super(id, 0L);
         this.tag = tag;
         if (post != null) {
             this.post = post;

@@ -39,7 +39,7 @@ public class User extends BaseEntity {
 
     @Builder
     public User(Long id, String name, String email, boolean isModerator, Gender gender, String phoneNumber, Set<Post> posts) {
-        super(id);
+        super(id, 0L);
         this.name = name;
         this.email = email;
         this.isModerator = isModerator;
