@@ -6,6 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import spring_forum.domain.Gender;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 @Getter
@@ -13,14 +17,21 @@ import java.util.Objects;
 @NoArgsConstructor
 public class UserDTO extends BaseDTO {
 
+    @NotBlank(message = "Name cannot be null")
+    @Size(min = 2, max = 64, message = "Minimum size of name = 2 and maximum = 64")
     private String name;
 
+    @NotBlank(message = "Email cannot be null")
+    @Email(message = "Please enter valid email.")
     private String email;
 
+    @NotNull(message = "isModerator property cannot be null")
     private boolean isModerator;
 
+    @NotNull(message = "Gender field cannot be null")
     private Gender gender;
 
+    @NotBlank(message = "Phone number cannot be null")
     private String phoneNumber;
 
     @Builder

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Getter
@@ -12,8 +14,10 @@ import java.util.Objects;
 @NoArgsConstructor
 public class TagDTO extends BaseDTO {
 
+    @NotBlank(message = "Tag cannot be empty")
     private String tag;
 
+    @NotNull(message = "Post ID cannot be empty")
     private Long postID;
 
     @Builder

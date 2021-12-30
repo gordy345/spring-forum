@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 @Getter
@@ -12,10 +15,14 @@ import java.util.Objects;
 @NoArgsConstructor
 public class PostDTO extends BaseDTO {
 
+    @NotBlank(message = "Title cannot be null")
+    @Size(min = 2, max = 60, message = "Title size must be between 2 and 60.")
     private String title;
 
+    @NotBlank(message = "Text cannot be empty")
     private String text;
 
+    @NotNull(message = "Post owner ID cannot be null")
     private Long postOwnerID;
 
     @Builder

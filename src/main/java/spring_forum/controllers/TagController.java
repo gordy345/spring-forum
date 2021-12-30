@@ -8,6 +8,7 @@ import spring_forum.dtos.TagDTO;
 import spring_forum.services.PostService;
 import spring_forum.services.TagService;
 
+import javax.validation.Valid;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class TagController {
     }
 
     @PostMapping
-    public TagDTO saveTag(@RequestBody TagDTO tagDTO) {
+    public TagDTO saveTag(@Valid @RequestBody TagDTO tagDTO) {
         Post postByID = postService.findByID(tagDTO.getPostID());
         Tag tagToSave = tagConverter.convertToTag(tagDTO);
         tagToSave.setPost(postByID);
@@ -48,7 +49,7 @@ public class TagController {
     }
 
     @PutMapping
-    public TagDTO updateTag(@RequestBody TagDTO tagDTO) {
+    public TagDTO updateTag(@Valid @RequestBody TagDTO tagDTO) {
         Post postByID = postService.findByID(tagDTO.getPostID());
         Tag tagToUpdate = tagConverter.convertToTag(tagDTO);
         tagToUpdate.setPost(postByID);

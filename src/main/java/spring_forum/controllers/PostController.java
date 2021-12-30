@@ -8,6 +8,7 @@ import spring_forum.dtos.PostDTO;
 import spring_forum.services.PostService;
 import spring_forum.services.UserService;
 
+import javax.validation.Valid;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -57,7 +58,7 @@ public class PostController {
     }
 
     @PostMapping
-    public PostDTO savePost(@RequestBody PostDTO postDTO) {
+    public PostDTO savePost(@Valid @RequestBody PostDTO postDTO) {
         User postOwner = userService.findByID(postDTO.getPostOwnerID());
         Post postToSave = postConverter.convertToPost(postDTO);
         postToSave.setPostOwner(postOwner);
@@ -67,7 +68,7 @@ public class PostController {
     }
 
     @PutMapping
-    public PostDTO updatePost(@RequestBody PostDTO postDTO) {
+    public PostDTO updatePost(@Valid @RequestBody PostDTO postDTO) {
         postService.update(postConverter.convertToPost(postDTO));
         return postDTO;
     }

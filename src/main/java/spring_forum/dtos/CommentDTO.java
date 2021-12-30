@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Objects;
 
 @Getter
@@ -12,10 +15,14 @@ import java.util.Objects;
 @NoArgsConstructor
 public class CommentDTO extends BaseDTO {
 
+    @NotBlank(message = "Comment cannot be null")
+    @Size(min = 2, max = 8000, message = "Text size must be between 2 and 8000.")
     private String text;
 
+    @NotNull(message = "Comment owner ID cannot be empty")
     private Long commentOwnerID;
 
+    @NotNull(message = "Post ID cannot be empty")
     private Long postID;
 
     @Builder

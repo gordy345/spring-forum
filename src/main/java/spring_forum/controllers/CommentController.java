@@ -10,6 +10,7 @@ import spring_forum.services.CommentService;
 import spring_forum.services.PostService;
 import spring_forum.services.UserService;
 
+import javax.validation.Valid;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,7 +43,7 @@ public class CommentController {
     }
 
     @PostMapping
-    public CommentDTO saveComment(@RequestBody CommentDTO commentDTO) {
+    public CommentDTO saveComment(@Valid @RequestBody CommentDTO commentDTO) {
         User commentOwner = userService.findByID(commentDTO.getCommentOwnerID());
         Post post = postService.findByID(commentDTO.getPostID());
         Comment commentToSave = commentConverter.convertToComment(commentDTO);
@@ -54,7 +55,7 @@ public class CommentController {
     }
 
     @PutMapping
-    public CommentDTO updateComment(@RequestBody CommentDTO commentDTO) {
+    public CommentDTO updateComment(@Valid @RequestBody CommentDTO commentDTO) {
         User commentOwner = userService.findByID(commentDTO.getCommentOwnerID());
         Post post = postService.findByID(commentDTO.getPostID());
         Comment commentToUpdate = commentConverter.convertToComment(commentDTO);

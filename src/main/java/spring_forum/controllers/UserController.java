@@ -6,6 +6,7 @@ import spring_forum.domain.User;
 import spring_forum.dtos.UserDTO;
 import spring_forum.services.UserService;
 
+import javax.validation.Valid;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,14 +40,14 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDTO saveUser(@RequestBody UserDTO userDTO) {
+    public UserDTO saveUser(@Valid @RequestBody UserDTO userDTO) {
         User savedUser = userService.save(userConverter.convertToUser(userDTO));
         userDTO.setId(savedUser.getId());
         return userDTO;
     }
 
     @PutMapping
-    public UserDTO updateUser(@RequestBody UserDTO userDTO) {
+    public UserDTO updateUser(@Valid @RequestBody UserDTO userDTO) {
         userService.update(userConverter.convertToUser(userDTO));
         return userDTO;
     }
