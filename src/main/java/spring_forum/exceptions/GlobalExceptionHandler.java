@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.persistence.OptimisticLockException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,8 +27,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler()
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(
+    @ExceptionHandler
+    public ResponseEntity<Map<String, String>> handleValidationException(
             MethodArgumentNotValidException ex) {
         log.warn("ValidationException happened..");
         Map<String, String> errors = new HashMap<>();
@@ -37,5 +38,11 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<String> handleOptimisticLockException(OptimisticLockException exception) {
+        log.warn("OptimisticLockException happened, message: " + exception.getMessage());
+        return new ResponseEntity<>("Something went wrong. Try again.", HttpStatus.CONFLICT);
     }
 }
