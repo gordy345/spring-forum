@@ -29,8 +29,8 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public Set<Comment> findCommentsForPostByID(Long postID) {
-        Post post = postService.findByID(postID);
         log.info("Finding comments for post with ID = " + postID);
+        Post post = postService.findByID(postID);
         Set<Comment> comments = post.getComments();
         if(comments.size() == 0) {
             String message = "There are no comments for this post.";
@@ -50,7 +50,6 @@ public class CommentServiceImpl implements CommentService {
             producer.send(message);
             throw new NotFoundException(message);
         }
-        //        comment.setPost(comment.getPost());
         return commentOptional.get();
     }
 

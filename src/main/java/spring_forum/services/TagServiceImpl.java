@@ -30,8 +30,8 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional
     public Set<Tag> findTagsForPostByID(Long postID) {
-        Post post = postService.findByID(postID);
         log.info("Finding tags for post with ID = " + postID);
+        Post post = postService.findByID(postID);
         Set<Tag> tags = post.getTags();
         if (tags.size() == 0) {
             String message = "There are no tags for this post.";

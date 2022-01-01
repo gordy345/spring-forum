@@ -8,6 +8,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import spring_forum.domain.Comment;
 import spring_forum.domain.Post;
 import spring_forum.domain.User;
+import spring_forum.exceptions.NotFoundException;
+import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.CommentRepository;
 
 import java.util.HashSet;
@@ -15,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -29,13 +32,16 @@ class CommentServiceImplTests {
     @Mock
     private PostService postService;
 
+    @Mock
+    private Producer producer;
+
     private CommentService commentService;
 
     private final Comment comment = Comment.builder().id(1L).text("Test").build();
 
     @BeforeEach
     void setUp() {
-        commentService = new CommentServiceImpl(commentRepository, postService);
+        commentService = new CommentServiceImpl(commentRepository, postService, producer);
     }
 
     @Test
@@ -86,6 +92,50 @@ class CommentServiceImplTests {
         commentService.deleteByID(1L);
         verify(commentRepository).findById(anyLong());
         verify(commentRepository).delete(any(Comment.class));
+    }
 
+    @Test
+    void findCommentsForPostWithError1() {
+        when(postService.findByID(anyLong())).thenThrow(new NotFoundException("There is no post with ID = -1"));
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> commentService.findCommentsForPostByID(-1L));
+        assertEquals("There is no post with ID = -1", exception.getMessage());
+        verify(postService).findByID(anyLong());
+    }
+
+    @Test
+    void findCommentsForPostWithError2() {
+        when(postService.findByID(anyLong())).thenReturn(Post.builder().build());
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> commentService.findCommentsForPostByID(1L));
+        assertEquals("There are no comments for this post.", exception.getMessage());
+        verify(postService).findByID(anyLong());
+    }
+
+    @Test
+    void findByIDWithError() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> commentService.findByID(-1L));
+        assertEquals("Comment with ID = -1 doesn't exist.", exception.getMessage());
+        verify(commentRepository).findById(anyLong());
+    }
+
+    @Test
+    void updateWithError() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> commentService.update(comment));
+        assertEquals("Comment with ID = " + comment.getId() + " doesn't exist.", exception.getMessage());
+        verify(commentRepository).findById(anyLong());
+    }
+
+    @Test
+    void deleteWithError() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> commentService.deleteByID(-1L));
+        assertEquals("Comment with ID = -1 doesn't exist.", exception.getMessage());
+        verify(commentRepository).findById(anyLong());
     }
 }
