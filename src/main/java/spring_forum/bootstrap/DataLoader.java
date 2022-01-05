@@ -2,16 +2,19 @@ package spring_forum.bootstrap;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 import spring_forum.domain.*;
 import spring_forum.repositories.PostRepository;
 import spring_forum.repositories.UserRepository;
 
+import javax.annotation.PreDestroy;
 import javax.transaction.Transactional;
 import java.util.List;
 
 @Slf4j
+@Profile({"test", "default"})
 @Component
 public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
@@ -30,6 +33,12 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
         List<User> users = getUsers();
         userRepository.saveAll(users);
         postRepository.saveAll(getPosts(users));
+    }
+
+    @Transactional
+    @PreDestroy
+    void onStop() {
+        removeData();
     }
 
     private List<User> getUsers() {
@@ -80,5 +89,11 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
         firstPost.getComments().add(comment);
 
         return List.of(firstPost, secondPost);
+    }
+
+    private void removeData() {
+        log.info("Removing data..");
+        postRepository.deleteAll();
+        userRepository.deleteAll();
     }
 }
