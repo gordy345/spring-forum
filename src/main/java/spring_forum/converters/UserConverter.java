@@ -16,6 +16,8 @@ public class UserConverter {
                 .isModerator(user.isModerator())
                 .gender(user.getGender())
                 .phoneNumber(user.getPhoneNumber())
+                .country(user.getCountry())
+                .language(user.getLanguage())
                 .build();
     }
 
@@ -28,6 +30,8 @@ public class UserConverter {
                 .isModerator(userDTO.isModerator())
                 .gender(userDTO.getGender())
                 .phoneNumber(userDTO.getPhoneNumber())
+                .country(userDTO.getCountry())
+                .language(userDTO.getLanguage())
                 .build();
 
     }

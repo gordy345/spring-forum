@@ -34,14 +34,21 @@ public class UserDTO extends BaseDTO {
     @NotBlank(message = "Phone number cannot be null")
     private String phoneNumber;
 
+    private String country;
+
+    private String language;
+
     @Builder
-    public UserDTO(Long id, String name, String email, boolean isModerator, Gender gender, String phoneNumber) {
+    public UserDTO(Long id, String name, String email, boolean isModerator,
+                   Gender gender, String phoneNumber, String country, String language) {
         super(id);
         this.name = name;
         this.email = email;
         this.isModerator = isModerator;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
+        this.country = country;
+        this.language = language;
     }
 
     @Override
@@ -53,11 +60,13 @@ public class UserDTO extends BaseDTO {
                 Objects.equals(name, userDTO.name) &&
                 Objects.equals(email, userDTO.email) &&
                 gender == userDTO.gender &&
-                Objects.equals(phoneNumber, userDTO.phoneNumber);
+                Objects.equals(phoneNumber, userDTO.phoneNumber) &&
+                Objects.equals(country, userDTO.country) &&
+                Objects.equals(language, userDTO.language);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, email, isModerator, gender, phoneNumber);
+        return Objects.hash(name, email, isModerator, gender, phoneNumber, country, language);
     }
 }

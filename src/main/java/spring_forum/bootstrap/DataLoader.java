@@ -48,6 +48,8 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
         dan.setName("Danya");
         dan.setPhoneNumber("+79875643232");
         dan.setGender(Gender.M);
+        dan.setCountry("Russia");
+        dan.setLanguage("ru");
 
         User kirill = new User();
         kirill.setEmail("kirill113@gmail.com");
@@ -55,6 +57,8 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
         kirill.setName("Kirill");
         kirill.setPhoneNumber("+79875467387");
         kirill.setGender(Gender.M);
+        kirill.setCountry("Russia");
+        kirill.setLanguage("ru");
 
         return List.of(dan, kirill);
     }

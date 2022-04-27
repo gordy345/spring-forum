@@ -89,6 +89,12 @@ public class UserServiceImpl implements UserService {
         userByID.setGender(user.getGender());
         userByID.setModerator(user.isModerator());
         userByID.setPhoneNumber(user.getPhoneNumber());
+        if (user.getCountry() != null) {
+            userByID.setCountry(user.getCountry());
+        }
+        if (user.getLanguage() != null) {
+            userByID.setLanguage(user.getLanguage());
+        }
         return userByID;
     }
 

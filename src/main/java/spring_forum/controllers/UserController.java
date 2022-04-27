@@ -5,7 +5,9 @@ import spring_forum.converters.UserConverter;
 import spring_forum.domain.User;
 import spring_forum.dtos.UserDTO;
 import spring_forum.services.UserService;
+import spring_forum.utils.GeoUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,7 +42,13 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDTO saveUser(@Valid @RequestBody UserDTO userDTO) {
+    public UserDTO saveUser(@Valid @RequestBody UserDTO userDTO, HttpServletRequest request) {
+        if (userDTO.getCountry() == null) {
+            userDTO.setCountry(GeoUtils.getCountryByIp(request.getRemoteHost()));
+        }
+        if (userDTO.getLanguage() == null) {
+            userDTO.setLanguage(GeoUtils.getLanguageByCountry(userDTO.getCountry()));
+        }
         User savedUser = userService.save(userConverter.convertToUser(userDTO));
         userDTO.setId(savedUser.getId());
         return userDTO;
@@ -48,7 +56,9 @@ public class UserController {
 
     @PutMapping
     public UserDTO updateUser(@Valid @RequestBody UserDTO userDTO) {
-        userService.update(userConverter.convertToUser(userDTO));
+        User updatedUser = userService.update(userConverter.convertToUser(userDTO));
+        userDTO.setCountry(updatedUser.getCountry());
+        userDTO.setLanguage(updatedUser.getLanguage());
         return userDTO;
     }
 

@@ -11,9 +11,11 @@ public class UserConverterTests {
 
     private final UserConverter userConverter = new UserConverter();
     private final User user = User.builder().id(1L).name("Dan").email("Dan@ya.ru")
-            .isModerator(true).gender(Gender.M).phoneNumber("+7").build();
+            .isModerator(true).gender(Gender.M).phoneNumber("+7")
+            .country("country").language("language").build();
     private final UserDTO userDTO = UserDTO.builder().id(1L).name("Dan").email("Dan@ya.ru")
-            .isModerator(true).gender(Gender.M).phoneNumber("+7").build();
+            .isModerator(true).gender(Gender.M).phoneNumber("+7")
+            .country("country").language("language").build();
 
     @Test
     public void testNullObjectToDTO() throws Exception {

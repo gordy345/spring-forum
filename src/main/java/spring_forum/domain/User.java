@@ -34,17 +34,26 @@ public class User extends BaseEntity {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    @Column(name = "country")
+    private String country;
+
+    @Column(name = "language")
+    private String language;
+
     @OneToMany(mappedBy = "postOwner")
     private Set<Post> posts = new HashSet<>();
 
     @Builder
-    public User(Long id, String name, String email, boolean isModerator, Gender gender, String phoneNumber, Set<Post> posts) {
+    public User(Long id, String name, String email, boolean isModerator, Gender gender,
+                String phoneNumber, String country, String language, Set<Post> posts) {
         super(id, 0L);
         this.name = name;
         this.email = email;
         this.isModerator = isModerator;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
+        this.country = country;
+        this.language = language;
         if (posts != null) {
             this.posts = posts;
         }
