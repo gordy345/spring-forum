@@ -10,4 +10,6 @@ public interface UserService extends CrudService<User, Long> {
 
     User findUserByName(String name);
 
+    String uploadAvatar(Long id, byte[] fileContent);
+
 }

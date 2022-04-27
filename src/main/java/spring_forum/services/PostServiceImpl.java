@@ -125,10 +125,11 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void deleteByID(Long id) {
+    public Post deleteByID(Long id) {
         log.info("Deleting post with ID = " + id);
         Post post = findByID(id);
         postRepository.delete(post);
+        return post;
     }
 
 }

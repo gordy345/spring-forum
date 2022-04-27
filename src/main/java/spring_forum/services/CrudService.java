@@ -8,5 +8,5 @@ public interface CrudService<T, ID> {
 
     T update(T entity);
 
-    void deleteByID(ID id);
+    T deleteByID(ID id);
 }

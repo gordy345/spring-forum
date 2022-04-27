@@ -1,6 +1,7 @@
 package spring_forum.services;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.User;
 import spring_forum.exceptions.ExistsException;
@@ -44,7 +45,7 @@ public class UserServiceImpl implements UserService {
     public User findUserByName(String name) {
         log.info("Finding user by name: " + name);
         Optional<User> userOptional = userRepository.findUserByName(name);
-        if(userOptional.isEmpty()) {
+        if (userOptional.isEmpty()) {
             String message = "User \"" + name + "\" doesn't exist.";
             producer.send(message);
             throw new NotFoundException(message);
@@ -54,10 +55,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public String uploadAvatar(Long id, byte[] fileContent) {
+        log.info("Uploading avatar for user with ID = " + id);
+        User user = findByID(id);
+        String url = user.getImageUrl();
+        if (url == null) {
+            url = "https://webdav.yandex.ru/avatars/"
+                    + RandomStringUtils.random(10, true, true) + ".jpeg";
+            user.setImageUrl(url);
+        }
+        return url;
+    }
+
+    @Override
+    @Transactional
     public User findByID(Long id) {
         log.info("Finding user with ID = " + id);
         Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isEmpty()) {
+        if (userOptional.isEmpty()) {
             String message = "User with ID = " + id + " doesn't exist.";
             producer.send(message);
             throw new NotFoundException(message);
@@ -100,9 +115,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteByID(Long id) {
+    public User deleteByID(Long id) {
         log.info("Deleting user with ID = " + id);
         User user = findByID(id);
         userRepository.delete(user);
+        return user;
     }
 }
