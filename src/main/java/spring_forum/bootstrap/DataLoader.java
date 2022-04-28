@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import spring_forum.domain.*;
 import spring_forum.repositories.PostRepository;
 import spring_forum.repositories.UserRepository;
+import spring_forum.services.PostService;
+import spring_forum.services.UserService;
 
 import javax.annotation.PreDestroy;
 import javax.transaction.Transactional;
@@ -20,10 +22,14 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final UserService userService;
+    private final PostService postService;
 
-    public DataLoader(UserRepository userRepository, PostRepository postRepository) {
+    public DataLoader(UserRepository userRepository, PostRepository postRepository, UserService userService, PostService postService) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
+        this.userService = userService;
+        this.postService = postService;
     }
 
     @Override
@@ -97,7 +103,7 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
     private void removeData() {
         log.info("Removing data..");
-        postRepository.deleteAll();
-        userRepository.deleteAll();
+        postService.findAll().forEach(post -> postService.deleteByID(post.getId()));
+        userService.findAll().forEach(user -> userService.deleteByID(user.getId()));
     }
 }
