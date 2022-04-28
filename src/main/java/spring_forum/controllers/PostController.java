@@ -5,12 +5,16 @@ import spring_forum.converters.PostConverter;
 import spring_forum.domain.Post;
 import spring_forum.domain.User;
 import spring_forum.dtos.PostDTO;
+import spring_forum.services.CacheService;
 import spring_forum.services.PostService;
 import spring_forum.services.UserService;
+import spring_forum.utils.Utils;
 
 import javax.validation.Valid;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static spring_forum.utils.CacheKeys.*;
 
 @RestController
 @RequestMapping("/posts")
@@ -19,42 +23,80 @@ public class PostController {
     private final PostService postService;
     private final PostConverter postConverter;
     private final UserService userService;
+    private final CacheService cacheService;
 
-    public PostController(PostService postService, PostConverter postConverter, UserService userService) {
+    public PostController(PostService postService, PostConverter postConverter, UserService userService, CacheService cacheService) {
         this.postService = postService;
         this.postConverter = postConverter;
         this.userService = userService;
+        this.cacheService = cacheService;
     }
 
     @GetMapping
-    public Set<PostDTO> showAllPosts() {
-        return postService.findAll().stream()
+    public String showAllPosts() {
+        String cacheKey = ALL_POSTS;
+        if (cacheService.containsKey(cacheKey)) {
+            return cacheService.get(cacheKey);
+        }
+        Set<PostDTO> postDTOS = postService.findAll().stream()
                 .map(postConverter::convertToPostDTO)
                 .collect(Collectors.toSet());
+        String jsonResult = Utils.convertToJson(postDTOS);
+        cacheService.put(cacheKey, jsonResult);
+        return jsonResult;
     }
 
     @GetMapping("/user/{id}")
-    public Set<PostDTO> showPostsForUser(@PathVariable Long id) {
-        return postService.findPostsForUserByID(id).stream()
+    public String showPostsForUser(@PathVariable Long id) {
+        String cacheKey = POSTS_FOR_USER + id;
+        if (cacheService.containsKey(cacheKey)) {
+            return cacheService.get(cacheKey);
+        }
+        Set<PostDTO> postDTOS = postService.findPostsForUserByID(id).stream()
                 .map(postConverter::convertToPostDTO)
                 .collect(Collectors.toSet());
+        String jsonResult = Utils.convertToJson(postDTOS);
+        cacheService.put(cacheKey, jsonResult);
+        return jsonResult;
     }
 
     @GetMapping("/tag/{tag}")
-    public Set<PostDTO> showPostsWithTag(@PathVariable String tag) {
-        return postService.findPostsByTag(tag).stream()
+    public String showPostsWithTag(@PathVariable String tag) {
+        String cacheKey = POSTS_BY_TAG + tag;
+        if (cacheService.containsKey(cacheKey)) {
+            return cacheService.get(cacheKey);
+        }
+        Set<PostDTO> postDTOS = postService.findPostsByTag(tag).stream()
                 .map(postConverter::convertToPostDTO)
                 .collect(Collectors.toSet());
+        String jsonResult = Utils.convertToJson(postDTOS);
+        cacheService.put(cacheKey, jsonResult);
+        return jsonResult;
     }
 
     @GetMapping("/{id}")
-    public PostDTO findPostByID(@PathVariable Long id) {
-        return postConverter.convertToPostDTO(postService.findByID(id));
+    public String findPostByID(@PathVariable Long id) {
+        String cacheKey = POST_BY_ID + id;
+        if (cacheService.containsKey(cacheKey)) {
+            return cacheService.get(cacheKey);
+        }
+        PostDTO postDTO = postConverter.convertToPostDTO(postService.findByID(id));
+        String jsonResult = Utils.convertToJson(postDTO);
+        cacheService.put(cacheKey, jsonResult);
+        return jsonResult;
     }
 
     @GetMapping("/title/{title}")
-    public PostDTO findPostByTitle(@PathVariable String title) {
-        return postConverter.convertToPostDTO(postService.findPostByTitle(title));
+    public String findPostByTitle(@PathVariable String title) {
+        String cacheKey = POST_BY_TITLE + title;
+        if (cacheService.containsKey(cacheKey)) {
+            return cacheService.get(cacheKey);
+        }
+        PostDTO postDTO =
+                postConverter.convertToPostDTO(postService.findPostByTitle(title));
+        String jsonResult = Utils.convertToJson(postDTO);
+        cacheService.put(cacheKey, jsonResult);
+        return jsonResult;
     }
 
     @PostMapping

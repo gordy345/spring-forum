@@ -33,15 +33,19 @@ class TagServiceImplTests {
     private PostService postService;
 
     @Mock
+    private CacheService cacheService;
+
+    @Mock
     private Producer producer;
 
     private TagService tagService;
 
-    private final Tag tag = Tag.builder().id(1L).tag("Test").build();
+    private final Tag tag = Tag.builder().id(1L).tag("Test")
+            .post(Post.builder().id(1L).build()).build();
 
     @BeforeEach
     void setUp() {
-        tagService = new TagServiceImpl(tagRepository, postService, producer);
+        tagService = new TagServiceImpl(tagRepository, postService, cacheService, producer);
     }
 
     @Test
@@ -67,7 +71,6 @@ class TagServiceImplTests {
 
     @Test
     void save() {
-        tag.setPost(Post.builder().id(1L).build());
         when(tagRepository.save(any())).thenReturn(tag);
         Tag savedTag = tagService.save(tag);
         assertEquals(1L, savedTag.getId());
@@ -78,8 +81,7 @@ class TagServiceImplTests {
     @Test
     void update() {
         when(tagRepository.findById(anyLong())).thenReturn(
-                Optional.of(Tag.builder().id(1L).build()));
-        tag.setPost(Post.builder().id(1L).build());
+                Optional.of(Tag.builder().id(1L).post(tag.getPost()).build()));
         Tag updatedTag = tagService.update(tag);
         assertEquals(1L, updatedTag.getId());
         assertEquals("Test", updatedTag.getTag());

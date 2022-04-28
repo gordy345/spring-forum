@@ -1,6 +1,9 @@
 package spring_forum.controllers.users;
 
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.parsing.Parser;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -16,6 +19,11 @@ import static org.hamcrest.CoreMatchers.equalTo;
 public class UserValidTests {
 
     private static final String DEFAULT_URL = "http://localhost:8080/users";
+
+    @BeforeAll
+    static void beforeAll() {
+        RestAssured.registerParser("text/plain", Parser.JSON);
+    }
 
     @Test
     public void basicStatusCodeTest() {

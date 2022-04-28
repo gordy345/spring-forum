@@ -16,17 +16,21 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static spring_forum.utils.CacheKeys.*;
+
 @Slf4j
 @Service
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final UserService userService;
+    private final CacheService cacheService;
     private final Producer producer;
 
-    public PostServiceImpl(PostRepository postRepository, UserService userService, Producer producer) {
+    public PostServiceImpl(PostRepository postRepository, UserService userService, CacheService cacheService, Producer producer) {
         this.postRepository = postRepository;
         this.userService = userService;
+        this.cacheService = cacheService;
         this.producer = producer;
     }
 
@@ -106,6 +110,8 @@ public class PostServiceImpl implements PostService {
         if (postRepository.findPostByTitle(post.getTitle()).isPresent()) {
             throw new ExistsException("Post with title \"" + post.getTitle() + "\" already exists.");
         }
+        cacheService.remove(ALL_POSTS,
+                POSTS_FOR_USER + post.getPostOwner().getId());
         return postRepository.save(post);
     }
 
@@ -118,6 +124,14 @@ public class PostServiceImpl implements PostService {
                 postRepository.findPostByTitle(post.getTitle()).isPresent()) {
             throw new ExistsException("Post with title \"" + post.getTitle() + "\" already exists.");
         }
+        cacheService.remove(ALL_POSTS,
+                POSTS_FOR_USER + postByID.getPostOwner().getId(),
+                POST_BY_ID + postByID.getId(),
+                POST_BY_TITLE + postByID.getTitle());
+        cacheService.remove(postByID.getTags()
+                .stream()
+                .map(tag -> POSTS_BY_TAG + tag.getTag())
+                .collect(Collectors.toList()));
         postByID.setTitle(post.getTitle());
         postByID.setText(post.getText());
         return postByID;
@@ -128,6 +142,16 @@ public class PostServiceImpl implements PostService {
     public Post deleteByID(Long id) {
         log.info("Deleting post with ID = " + id);
         Post post = findByID(id);
+        cacheService.remove(ALL_POSTS,
+                POSTS_FOR_USER + post.getPostOwner().getId(),
+                POST_BY_ID + post.getId(),
+                POST_BY_TITLE + post.getTitle(),
+                TAGS_FOR_POST + id,
+                COMMENTS_FOR_POST + id);
+        cacheService.remove(post.getTags()
+                .stream()
+                .map(tag -> POSTS_BY_TAG + tag.getTag())
+                .collect(Collectors.toList()));
         postRepository.delete(post);
         return post;
     }

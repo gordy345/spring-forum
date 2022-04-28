@@ -12,17 +12,22 @@ import javax.transaction.Transactional;
 import java.util.Optional;
 import java.util.Set;
 
+import static spring_forum.utils.CacheKeys.COMMENTS_FOR_POST;
+import static spring_forum.utils.CacheKeys.COMMENT_BY_ID;
+
 @Slf4j
 @Service
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
     private final PostService postService;
+    private final CacheService cacheService;
     private final Producer producer;
 
-    public CommentServiceImpl(CommentRepository commentRepository, PostService postService, Producer producer) {
+    public CommentServiceImpl(CommentRepository commentRepository, PostService postService, CacheService cacheService, Producer producer) {
         this.commentRepository = commentRepository;
         this.postService = postService;
+        this.cacheService = cacheService;
         this.producer = producer;
     }
 
@@ -57,6 +62,7 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public Comment save(Comment comment) {
         log.info("Saving new comment..");
+        cacheService.remove(COMMENTS_FOR_POST + comment.getPost().getId());
         return commentRepository.save(comment);
     }
 
@@ -68,6 +74,8 @@ public class CommentServiceImpl implements CommentService {
         commentByID.setText(comment.getText());
         commentByID.setPost(comment.getPost());
         commentByID.setCommentOwner(comment.getCommentOwner());
+        cacheService.remove(COMMENT_BY_ID + comment.getId(),
+                COMMENTS_FOR_POST + comment.getPost().getId());
         return commentByID;
     }
 
@@ -76,6 +84,8 @@ public class CommentServiceImpl implements CommentService {
     public Comment deleteByID(Long id) {
         log.info("Deleting comment with ID = " + id);
         Comment comment = findByID(id);
+        cacheService.remove(COMMENT_BY_ID + id,
+                COMMENTS_FOR_POST + comment.getPost().getId());
         commentRepository.delete(comment);
         return comment;
     }

@@ -31,15 +31,19 @@ class PostServiceImplTests {
     private UserService userService;
 
     @Mock
+    private CacheService cacheService;
+
+    @Mock
     private Producer producer;
 
     private PostService postService;
 
-    private final Post post = Post.builder().id(1L).title("Test").text("Test").build();
+    private final Post post = Post.builder().id(1L).title("Test").text("Test")
+            .postOwner(User.builder().id(1L).build()).build();
 
     @BeforeEach
     void setUp() {
-        postService = new PostServiceImpl(postRepository, userService, producer);
+        postService = new PostServiceImpl(postRepository, userService, cacheService, producer);
     }
 
     @Test
@@ -118,7 +122,8 @@ class PostServiceImplTests {
     @Test
     void update() {
         when(postRepository.findById(anyLong())).thenReturn(
-                Optional.of(Post.builder().id(1L).title("Test").build()));
+                Optional.of(Post.builder().id(1L)
+                        .title("Test").postOwner(post.getPostOwner()).build()));
         Post updatedPost = postService.update(post);
         assertEquals(1L, updatedPost.getId());
         assertEquals("Test", updatedPost.getTitle());

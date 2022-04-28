@@ -14,15 +14,19 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import static spring_forum.utils.CacheKeys.*;
+
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final CacheService cacheService;
     private final Producer producer;
 
-    public UserServiceImpl(UserRepository userRepository, Producer producer) {
+    public UserServiceImpl(UserRepository userRepository, CacheService cacheService, Producer producer) {
         this.userRepository = userRepository;
+        this.cacheService = cacheService;
         this.producer = producer;
     }
 
@@ -55,7 +59,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public String uploadAvatar(Long id, byte[] fileContent) {
+    public String uploadAvatar(Long id) {
         log.info("Uploading avatar for user with ID = " + id);
         User user = findByID(id);
         String url = user.getImageUrl();
@@ -87,6 +91,7 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findUserByName(user.getName()).isPresent()) {
             throw new ExistsException("User with name \"" + user.getName() + "\" already exists.");
         }
+        cacheService.remove(ALL_USERS);
         return userRepository.save(user);
     }
 
@@ -99,6 +104,8 @@ public class UserServiceImpl implements UserService {
                 userRepository.findUserByName(user.getName()).isPresent()) {
             throw new ExistsException("User with name \"" + user.getName() + "\" already exists.");
         }
+        cacheService.remove(ALL_USERS, USER_BY_ID + user.getId(),
+                USER_BY_NAME + userByID.getName());
         userByID.setName(user.getName());
         userByID.setEmail(user.getEmail());
         userByID.setGender(user.getGender());
@@ -118,6 +125,9 @@ public class UserServiceImpl implements UserService {
     public User deleteByID(Long id) {
         log.info("Deleting user with ID = " + id);
         User user = findByID(id);
+        cacheService.remove(ALL_USERS, USER_BY_ID + id,
+                USER_BY_NAME + user.getName(), AVATAR_FOR_USER + id,
+                POSTS_FOR_USER + id);
         userRepository.delete(user);
         return user;
     }

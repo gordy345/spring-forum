@@ -1,4 +1,4 @@
-package spring_forum;
+package spring_forum.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;

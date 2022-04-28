@@ -45,4 +45,10 @@ public class GlobalExceptionHandler {
         log.warn("OptimisticLockException happened, message: " + exception.getMessage());
         return new ResponseEntity<>("Something went wrong. Try again.", HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException exception) {
+        log.warn("IllegalArgumentException happened, message: " + exception.getMessage());
+        return new ResponseEntity<>("Something went wrong. Try again.", HttpStatus.CONFLICT);
+    }
 }

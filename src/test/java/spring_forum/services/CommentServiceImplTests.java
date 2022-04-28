@@ -33,15 +33,19 @@ class CommentServiceImplTests {
     private PostService postService;
 
     @Mock
+    private CacheService cacheService;
+
+    @Mock
     private Producer producer;
 
     private CommentService commentService;
 
-    private final Comment comment = Comment.builder().id(1L).text("Test").build();
+    private final Comment comment = Comment.builder().id(1L).text("Test")
+            .post(Post.builder().id(1L).build()).build();
 
     @BeforeEach
     void setUp() {
-        commentService = new CommentServiceImpl(commentRepository, postService, producer);
+        commentService = new CommentServiceImpl(commentRepository, postService, cacheService, producer);
     }
 
     @Test

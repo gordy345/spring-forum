@@ -13,17 +13,22 @@ import javax.transaction.Transactional;
 import java.util.Optional;
 import java.util.Set;
 
+import static spring_forum.utils.CacheKeys.POSTS_BY_TAG;
+import static spring_forum.utils.CacheKeys.TAGS_FOR_POST;
+
 @Slf4j
 @Service
 public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
     private final PostService postService;
+    private final CacheService cacheService;
     private final Producer producer;
 
-    public TagServiceImpl(TagRepository tagRepository, PostService postService, Producer producer) {
+    public TagServiceImpl(TagRepository tagRepository, PostService postService, CacheService cacheService, Producer producer) {
         this.tagRepository = tagRepository;
         this.postService = postService;
+        this.cacheService = cacheService;
         this.producer = producer;
     }
 
@@ -62,6 +67,8 @@ public class TagServiceImpl implements TagService {
             throw new ExistsException("Tag you're trying to save already exists for post with ID = "
                     + tag.getPost().getId());
         }
+        cacheService.remove(TAGS_FOR_POST + tag.getPost().getId(),
+                POSTS_BY_TAG + tag.getTag());
         return tagRepository.save(tag);
     }
 
@@ -74,6 +81,9 @@ public class TagServiceImpl implements TagService {
             throw new ExistsException("Tag you're trying to save already exists for post with ID = "
                     + tag.getPost().getId());
         }
+        cacheService.remove(TAGS_FOR_POST + tag.getPost().getId(),
+                TAGS_FOR_POST + tagByID.getPost().getId(),
+                POSTS_BY_TAG + tag.getTag());
         tagByID.setTag(tag.getTag());
         tagByID.setPost(tag.getPost());
         return tagByID;
@@ -84,6 +94,8 @@ public class TagServiceImpl implements TagService {
     public Tag deleteByID(Long id) {
         log.info("Deleting tag with ID = " + id);
         Tag tag = findByID(id);
+        cacheService.remove(TAGS_FOR_POST + tag.getPost().getId(),
+                POSTS_BY_TAG + tag.getTag());
         tagRepository.delete(tag);
         return tag;
     }

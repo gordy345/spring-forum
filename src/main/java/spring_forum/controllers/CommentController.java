@@ -6,13 +6,18 @@ import spring_forum.domain.Comment;
 import spring_forum.domain.Post;
 import spring_forum.domain.User;
 import spring_forum.dtos.CommentDTO;
+import spring_forum.services.CacheService;
 import spring_forum.services.CommentService;
 import spring_forum.services.PostService;
 import spring_forum.services.UserService;
+import spring_forum.utils.Utils;
 
 import javax.validation.Valid;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static spring_forum.utils.CacheKeys.COMMENTS_FOR_POST;
+import static spring_forum.utils.CacheKeys.COMMENT_BY_ID;
 
 @RestController
 @RequestMapping("/comments")
@@ -22,24 +27,42 @@ public class CommentController {
     private final CommentConverter commentConverter;
     private final UserService userService;
     private final PostService postService;
+    private final CacheService cacheService;
 
-    public CommentController(CommentService commentService, CommentConverter commentConverter, UserService userService, PostService postService) {
+    public CommentController(CommentService commentService, CommentConverter commentConverter, UserService userService, PostService postService, CacheService cacheService) {
         this.commentService = commentService;
         this.commentConverter = commentConverter;
         this.userService = userService;
         this.postService = postService;
+        this.cacheService = cacheService;
     }
 
     @GetMapping("/post/{id}")
-    public Set<CommentDTO> showCommentsForPostByID(@PathVariable Long id) {
-        return commentService.findCommentsForPostByID(id).stream()
-                .map(commentConverter::convertToCommentDTO)
-                .collect(Collectors.toSet());
+    public String showCommentsForPostByID(@PathVariable Long id) {
+        String cacheKey = COMMENTS_FOR_POST + id;
+        if (cacheService.containsKey(cacheKey)) {
+            return cacheService.get(cacheKey);
+        }
+        Set<CommentDTO> commentDTOS =
+                commentService.findCommentsForPostByID(id).stream()
+                        .map(commentConverter::convertToCommentDTO)
+                        .collect(Collectors.toSet());
+        String jsonResult = Utils.convertToJson(commentDTOS);
+        cacheService.put(cacheKey, jsonResult);
+        return jsonResult;
     }
 
     @GetMapping("/{id}")
-    public CommentDTO findCommentByID(@PathVariable Long id) {
-        return commentConverter.convertToCommentDTO(commentService.findByID(id));
+    public String findCommentByID(@PathVariable Long id) {
+        String cacheKey = COMMENT_BY_ID + id;
+        if (cacheService.containsKey(cacheKey)) {
+            return cacheService.get(cacheKey);
+        }
+        CommentDTO commentDTO =
+                commentConverter.convertToCommentDTO(commentService.findByID(id));
+        String jsonResult = Utils.convertToJson(commentDTO);
+        cacheService.put(cacheKey, jsonResult);
+        return jsonResult;
     }
 
     @PostMapping
