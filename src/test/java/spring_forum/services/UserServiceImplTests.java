@@ -13,8 +13,7 @@ import spring_forum.repositories.UserRepository;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -98,9 +97,9 @@ class UserServiceImplTests {
     @Test
     void deleteByID() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        userService.deleteByID(1L);
+        User deletedUser = userService.deleteByID(1L);
         verify(userRepository).findById(anyLong());
-        verify(userRepository).delete(any(User.class));
+        assertFalse(deletedUser.isEnabled());
     }
 
     @Test

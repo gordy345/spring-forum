@@ -128,7 +128,7 @@ public class UserServiceImpl implements UserService {
         cacheService.remove(ALL_USERS, USER_BY_ID + id,
                 USER_BY_EMAIL + user.getEmail(), AVATAR_FOR_USER + id,
                 POSTS_FOR_USER + id);
-        userRepository.delete(user);
+        user.setEnabled(false);
         return user;
     }
 }

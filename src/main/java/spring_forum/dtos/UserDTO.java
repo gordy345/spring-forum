@@ -38,15 +38,18 @@ public class UserDTO extends BaseDTO {
 
     private String language;
 
+    private boolean enabled;
+
     @Builder
-    public UserDTO(Long id, String name, String email, boolean isModerator,
-                   Gender gender, String phoneNumber, String country, String language) {
+    public UserDTO(Long id, String name, String email, boolean isModerator, Gender gender,
+                   String phoneNumber, boolean enabled, String country, String language) {
         super(id);
         this.name = name;
         this.email = email;
         this.isModerator = isModerator;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
+        this.enabled = enabled;
         this.country = country;
         this.language = language;
     }

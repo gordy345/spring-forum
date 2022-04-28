@@ -34,6 +34,9 @@ public class User extends BaseEntity {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    @Column(name = "enabled")
+    private boolean enabled;
+
     @Column(name = "country")
     private String country;
 
@@ -48,7 +51,7 @@ public class User extends BaseEntity {
 
     @Builder
     public User(Long id, String name, String email, boolean isModerator,
-                Gender gender, String phoneNumber, String country,
+                Gender gender, String phoneNumber, boolean enabled, String country,
                 String language, String imageUrl, Set<Post> posts) {
         super(id, 0L);
         this.name = name;
@@ -56,6 +59,7 @@ public class User extends BaseEntity {
         this.isModerator = isModerator;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
+        this.enabled = enabled;
         this.country = country;
         this.language = language;
         this.imageUrl = imageUrl;
