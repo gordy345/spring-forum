@@ -50,8 +50,8 @@ public class UserValidTests {
     }
 
     @Test
-    public void findByNameValidTest() {
-        given().when().get(DEFAULT_URL + "/name/Danya").then()
+    public void findByEmailValidTest() {
+        given().when().get(DEFAULT_URL + "/email/gogo@ya.ru").then()
                 .body("id", equalTo(1))
                 .body("email", equalTo("gogo@ya.ru"))
                 .body("gender", equalTo("M"))

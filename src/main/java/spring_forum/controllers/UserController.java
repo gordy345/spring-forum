@@ -64,14 +64,14 @@ public class UserController {
         return jsonResult;
     }
 
-    @GetMapping("/name/{name}")
-    public String findUserByName(@PathVariable String name) {
-        String cacheKey = USER_BY_NAME + name;
+    @GetMapping("/email/{email}")
+    public String findUserByEmail(@PathVariable String email) {
+        String cacheKey = USER_BY_EMAIL + email;
         if (cacheService.containsKey(cacheKey)) {
             return cacheService.get(cacheKey);
         }
         UserDTO userDTO =
-                userConverter.convertToUserDTO(userService.findUserByName(name));
+                userConverter.convertToUserDTO(userService.findUserByEmail(email));
         String jsonResult = Utils.convertToJson(userDTO);
         cacheService.put(cacheKey, jsonResult);
         return jsonResult;

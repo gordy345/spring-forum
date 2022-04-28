@@ -46,11 +46,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public User findUserByName(String name) {
-        log.info("Finding user by name: " + name);
-        Optional<User> userOptional = userRepository.findUserByName(name);
+    public User findUserByEmail(String email) {
+        log.info("Finding user by email: " + email);
+        Optional<User> userOptional = userRepository.findUserByEmail(email);
         if (userOptional.isEmpty()) {
-            String message = "User \"" + name + "\" doesn't exist.";
+            String message = "User with email \"" + email + "\" doesn't exist.";
             producer.send(message);
             throw new NotFoundException(message);
         }
@@ -87,9 +87,9 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User save(User user) {
-        log.info("Saving user with name: " + user.getName());
-        if (userRepository.findUserByName(user.getName()).isPresent()) {
-            throw new ExistsException("User with name \"" + user.getName() + "\" already exists.");
+        log.info("Saving user with email: " + user.getEmail());
+        if (userRepository.findUserByEmail(user.getEmail()).isPresent()) {
+            throw new ExistsException("User with email \"" + user.getEmail() + "\" already exists.");
         }
         cacheService.remove(ALL_USERS);
         return userRepository.save(user);
@@ -100,12 +100,12 @@ public class UserServiceImpl implements UserService {
     public User update(User user) {
         log.info("Updating user with ID = " + user.getId());
         User userByID = findByID(user.getId());
-        if (!userByID.getName().equals(user.getName()) &&
-                userRepository.findUserByName(user.getName()).isPresent()) {
-            throw new ExistsException("User with name \"" + user.getName() + "\" already exists.");
+        if (!userByID.getEmail().equals(user.getEmail()) &&
+                userRepository.findUserByEmail(user.getEmail()).isPresent()) {
+            throw new ExistsException("User with email \"" + user.getEmail() + "\" already exists.");
         }
         cacheService.remove(ALL_USERS, USER_BY_ID + user.getId(),
-                USER_BY_NAME + userByID.getName());
+                USER_BY_EMAIL + userByID.getEmail());
         userByID.setName(user.getName());
         userByID.setEmail(user.getEmail());
         userByID.setGender(user.getGender());
@@ -126,7 +126,7 @@ public class UserServiceImpl implements UserService {
         log.info("Deleting user with ID = " + id);
         User user = findByID(id);
         cacheService.remove(ALL_USERS, USER_BY_ID + id,
-                USER_BY_NAME + user.getName(), AVATAR_FOR_USER + id,
+                USER_BY_EMAIL + user.getEmail(), AVATAR_FOR_USER + id,
                 POSTS_FOR_USER + id);
         userRepository.delete(user);
         return user;

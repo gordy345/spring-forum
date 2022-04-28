@@ -8,7 +8,7 @@ public interface UserService extends CrudService<User, Long> {
 
     Set<User> findAll();
 
-    User findUserByName(String name);
+    User findUserByEmail(String email);
 
     String uploadAvatar(Long id);
 

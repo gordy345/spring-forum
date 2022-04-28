@@ -24,21 +24,21 @@ public class UserErrorsTests {
     }
 
     @Test
-    public void findByNameWithErrorTest() {
-        given().when().get(DEFAULT_URL + "/name/Danyaa").then()
-                .body(equalTo("User \"Danyaa\" doesn't exist."))
+    public void findByEmailWithErrorTest() {
+        given().when().get(DEFAULT_URL + "/email/gog@ya.ru").then()
+                .body(equalTo("User with email \"gog@ya.ru\" doesn't exist."))
                 .statusCode(400);
     }
 
     @Test
-    public void saveUserWithWrongNameTest() {
-        UserDTO user = UserDTO.builder().name("Danya").email("vanya333@ya.ru").isModerator(false)
+    public void saveUserWithWrongEmailTest() {
+        UserDTO user = UserDTO.builder().name("Vanya").email("gogo@ya.ru").isModerator(false)
                 .gender(Gender.M).phoneNumber("+79875463773").build();
         given()
                 .contentType(ContentType.JSON)
                 .body(user)
                 .when().post(DEFAULT_URL).then()
-                .body(equalTo("User with name \"Danya\" already exists."))
+                .body(equalTo("User with email \"gogo@ya.ru\" already exists."))
                 .statusCode(409);
     }
 
@@ -55,14 +55,14 @@ public class UserErrorsTests {
     }
 
     @Test
-    public void updateUserWrongNameTest() {
-        UserDTO user = UserDTO.builder().id(2L).name("Danya").email("gogog@ya.ru").isModerator(true)
+    public void updateUserWrongEmailTest() {
+        UserDTO user = UserDTO.builder().id(2L).name("Ivan").email("gogo@ya.ru").isModerator(true)
                 .gender(Gender.M).phoneNumber("+79875643232").build();
         given()
                 .contentType(ContentType.JSON)
                 .body(user)
                 .when().put(DEFAULT_URL).then()
-                .body(equalTo("User with name \"Danya\" already exists."))
+                .body(equalTo("User with email \"gogo@ya.ru\" already exists."))
                 .statusCode(409);
     }
 

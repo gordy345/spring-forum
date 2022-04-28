@@ -32,7 +32,7 @@ class UserServiceImplTests {
 
     private UserService userService;
 
-    private final User user = User.builder().id(1L).name("Dan").build();
+    private final User user = User.builder().id(1L).name("Dan").email("gogo@ya.ru").build();
 
     @BeforeEach
     void setUp() {
@@ -55,13 +55,14 @@ class UserServiceImplTests {
     }
 
     @Test
-    void findUserByName() {
+    void findUserByEmail() {
         Optional<User> userOptional = Optional.of(user);
-        when(userRepository.findUserByName(anyString())).thenReturn(userOptional);
-        User receivedUser = userService.findUserByName("Dan");
+        when(userRepository.findUserByEmail(anyString())).thenReturn(userOptional);
+        User receivedUser = userService.findUserByEmail("gogo@ya.ru");
         assertEquals(1L, receivedUser.getId());
         assertEquals("Dan", receivedUser.getName());
-        verify(userRepository).findUserByName(anyString());
+        assertEquals("gogo@ya.ru", receivedUser.getEmail());
+        verify(userRepository).findUserByEmail(anyString());
     }
 
     @Test
@@ -76,12 +77,12 @@ class UserServiceImplTests {
 
     @Test
     void save() {
-        when(userRepository.findUserByName(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
         when(userRepository.save(any())).thenReturn(user);
         User savedUser = userService.save(user);
         assertEquals(1L, savedUser.getId());
         assertEquals("Dan", savedUser.getName());
-        verify(userRepository).findUserByName(anyString());
+        verify(userRepository).findUserByEmail(anyString());
         verify(userRepository).save(any(User.class));
     }
 
@@ -111,12 +112,12 @@ class UserServiceImplTests {
     }
 
     @Test
-    void findUserByNameWithError() {
-        when(userRepository.findUserByName(anyString())).thenReturn(Optional.empty());
+    void findUserByEmailWithError() {
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> userService.findUserByName("Danny"));
-        assertEquals("User \"Danny\" doesn't exist.", exception.getMessage());
-        verify(userRepository).findUserByName(anyString());
+                () -> userService.findUserByEmail("gogo@ya.ru"));
+        assertEquals("User with email \"gogo@ya.ru\" doesn't exist.", exception.getMessage());
+        verify(userRepository).findUserByEmail(anyString());
     }
 
     @Test
@@ -130,11 +131,11 @@ class UserServiceImplTests {
 
     @Test
     void saveWithError() {
-        when(userRepository.findUserByName(anyString())).thenReturn(Optional.of(User.builder().build()));
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(User.builder().build()));
         ExistsException exception = assertThrows(ExistsException.class,
                 () -> userService.save(user));
-        assertEquals("User with name \"" + user.getName() + "\" already exists.", exception.getMessage());
-        verify(userRepository).findUserByName(anyString());
+        assertEquals("User with email \"" + user.getEmail() + "\" already exists.", exception.getMessage());
+        verify(userRepository).findUserByEmail(anyString());
     }
 
     @Test
@@ -148,13 +149,13 @@ class UserServiceImplTests {
 
     @Test
     void updateWithError2() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(User.builder().name("Danny").build()));
-        when(userRepository.findUserByName(anyString())).thenReturn(Optional.of(User.builder().build()));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(User.builder().email("gogog@ya.ru").build()));
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(User.builder().build()));
         ExistsException exception = assertThrows(ExistsException.class,
                 () -> userService.update(user));
-        assertEquals("User with name \"" + user.getName() + "\" already exists.", exception.getMessage());
+        assertEquals("User with email \"" + user.getEmail() + "\" already exists.", exception.getMessage());
         verify(userRepository).findById(anyLong());
-        verify(userRepository).findUserByName(anyString());
+        verify(userRepository).findUserByEmail(anyString());
     }
 
     @Test

@@ -7,7 +7,7 @@ public class CacheKeys {
 
     public static final String ALL_USERS = "allUsers";
     public static final String USER_BY_ID = "userById_";
-    public static final String USER_BY_NAME = "userByName_";
+    public static final String USER_BY_EMAIL = "userByEmail_";
     public static final String AVATAR_FOR_USER = "avatarForUser_";
 
     public static final String ALL_POSTS = "allPosts";
