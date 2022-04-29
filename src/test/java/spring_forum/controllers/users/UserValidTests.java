@@ -63,7 +63,8 @@ public class UserValidTests {
     @Test
     public void saveAndDeleteUserValidTest() {
         UserDTO user = UserDTO.builder().name("Ivan").email("vanya333@ya.ru").isModerator(false)
-                .gender(Gender.M).phoneNumber("+79875463773").country("Russia").language("ru").build();
+                .gender(Gender.M).phoneNumber("+79875463773").country("Russia").language("ru")
+                .build();
         Integer id = given()
                 .contentType(ContentType.JSON)
                 .body(user)
@@ -81,7 +82,8 @@ public class UserValidTests {
     @Test
     public void updateUserValidTest() {
         UserDTO user = UserDTO.builder().id(1L).name("Danya").email("gogog@ya.ru").isModerator(true)
-                .gender(Gender.M).phoneNumber("+79875643232").country("Russia").language("ru").build();
+                .gender(Gender.M).phoneNumber("+79875643232").country("Russia").language("ru")
+                .build();
         given()
                 .contentType(ContentType.JSON)
                 .body(user)

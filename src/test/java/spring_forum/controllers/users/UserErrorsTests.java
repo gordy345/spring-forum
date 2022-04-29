@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import spring_forum.domain.Gender;
+import spring_forum.dtos.RegisterDTO;
 import spring_forum.dtos.UserDTO;
 
 import static io.restassured.RestAssured.given;
@@ -32,8 +33,8 @@ public class UserErrorsTests {
 
     @Test
     public void saveUserWithWrongEmailTest() {
-        UserDTO user = UserDTO.builder().name("Vanya").email("gogo@ya.ru").isModerator(false)
-                .gender(Gender.M).phoneNumber("+79875463773").build();
+        RegisterDTO user = RegisterDTO.builder().name("Vanya").email("gogo@ya.ru").isModerator(false)
+                .gender(Gender.M).phoneNumber("+79875463773").password("password").confirmPassword("password").build();
         given()
                 .contentType(ContentType.JSON)
                 .body(user)

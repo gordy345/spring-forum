@@ -12,4 +12,5 @@ public interface UserService extends CrudService<User, Long> {
 
     String uploadAvatar(Long id);
 
+    void enableUser(String token);
 }

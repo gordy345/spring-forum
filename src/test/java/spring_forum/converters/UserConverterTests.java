@@ -1,6 +1,7 @@
 package spring_forum.converters;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import spring_forum.domain.Gender;
 import spring_forum.domain.User;
 import spring_forum.dtos.UserDTO;
@@ -9,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class UserConverterTests {
 
-    private final UserConverter userConverter = new UserConverter();
+    private final UserConverter userConverter = new UserConverter(new BCryptPasswordEncoder());
     private final User user = User.builder().id(1L).name("Dan").email("Dan@ya.ru")
             .isModerator(true).gender(Gender.M).phoneNumber("+7")
             .country("country").language("language").build();
@@ -20,11 +21,6 @@ public class UserConverterTests {
     @Test
     public void testNullObjectToDTO() throws Exception {
         assertNull(userConverter.convertToUserDTO(null));
-    }
-
-    @Test
-    public void testNullObjectFromDTO() throws Exception {
-        assertNull(userConverter.convertToUser(null));
     }
 
     @Test

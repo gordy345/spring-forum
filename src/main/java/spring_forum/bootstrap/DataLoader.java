@@ -4,10 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import spring_forum.domain.*;
 import spring_forum.repositories.PostRepository;
 import spring_forum.repositories.UserRepository;
+import spring_forum.repositories.VerificationTokenRepository;
 import spring_forum.services.PostService;
 import spring_forum.services.UserService;
 
@@ -22,14 +24,18 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
     private final UserService userService;
     private final PostService postService;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataLoader(UserRepository userRepository, PostRepository postRepository, UserService userService, PostService postService) {
+    public DataLoader(UserRepository userRepository, PostRepository postRepository, VerificationTokenRepository verificationTokenRepository, UserService userService, PostService postService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
+        this.verificationTokenRepository = verificationTokenRepository;
         this.userService = userService;
         this.postService = postService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -50,15 +56,18 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
     private List<User> getUsers() {
         User dan = new User();
         dan.setEmail("gogo@ya.ru");
+        dan.setPassword(passwordEncoder.encode("dan"));
         dan.setModerator(true);
         dan.setName("Danya");
         dan.setPhoneNumber("+79875643232");
         dan.setGender(Gender.M);
         dan.setCountry("Russia");
         dan.setLanguage("ru");
+        dan.setEnabled(true);
 
         User kirill = new User();
         kirill.setEmail("kirill113@gmail.com");
+        kirill.setPassword(passwordEncoder.encode("kir"));
         kirill.setModerator(false);
         kirill.setName("Kirill");
         kirill.setPhoneNumber("+79875467387");
@@ -103,7 +112,9 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
     private void removeData() {
         log.info("Removing data..");
+        verificationTokenRepository.deleteAll();
         postService.findAll().forEach(post -> postService.deleteByID(post.getId()));
         userService.findAll().forEach(user -> userService.deleteByID(user.getId()));
+        userRepository.deleteAll();
     }
 }

@@ -34,6 +34,9 @@ public class User extends BaseEntity {
     @Column(name = "phone_number")
     private String phoneNumber;
 
+    @Column(name = "password")
+    private String password;
+
     @Column(name = "enabled")
     private boolean enabled;
 
@@ -51,14 +54,15 @@ public class User extends BaseEntity {
 
     @Builder
     public User(Long id, String name, String email, boolean isModerator,
-                Gender gender, String phoneNumber, boolean enabled, String country,
-                String language, String imageUrl, Set<Post> posts) {
+                Gender gender, String phoneNumber, String password, boolean enabled,
+                String country, String language, String imageUrl, Set<Post> posts) {
         super(id, 0L);
         this.name = name;
         this.email = email;
         this.isModerator = isModerator;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
+        this.password = password;
         this.enabled = enabled;
         this.country = country;
         this.language = language;
@@ -74,14 +78,19 @@ public class User extends BaseEntity {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
         return isModerator == user.isModerator &&
+                enabled == user.enabled &&
                 Objects.equals(name, user.name) &&
                 Objects.equals(email, user.email) &&
                 gender == user.gender &&
-                Objects.equals(phoneNumber, user.phoneNumber);
+                Objects.equals(phoneNumber, user.phoneNumber) &&
+                Objects.equals(password, user.password) &&
+                Objects.equals(country, user.country) &&
+                Objects.equals(language, user.language) &&
+                Objects.equals(imageUrl, user.imageUrl);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, email, isModerator, gender, phoneNumber);
+        return Objects.hash(name, email, isModerator, gender, phoneNumber, password, enabled, country, language, imageUrl);
     }
 }

@@ -4,12 +4,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.User;
+import spring_forum.domain.VerificationToken;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
+import spring_forum.exceptions.TokenExpiredException;
 import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.UserRepository;
 
 import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -21,12 +24,16 @@ import static spring_forum.utils.CacheKeys.*;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final EmailService emailService;
     private final CacheService cacheService;
+    private final VerificationTokenService verificationTokenService;
     private final Producer producer;
 
-    public UserServiceImpl(UserRepository userRepository, CacheService cacheService, Producer producer) {
+    public UserServiceImpl(UserRepository userRepository, EmailService emailService, CacheService cacheService, VerificationTokenService verificationTokenService, Producer producer) {
         this.userRepository = userRepository;
+        this.emailService = emailService;
         this.cacheService = cacheService;
+        this.verificationTokenService = verificationTokenService;
         this.producer = producer;
     }
 
@@ -73,6 +80,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public void enableUser(String token) {
+        VerificationToken foundToken
+                = verificationTokenService.findTokenByValue(token);
+        User user = foundToken.getUser();
+        verificationTokenService.deleteTokenByValue(token);
+        log.info("Enabling user with ID = " + user.getId());
+        if (foundToken.getExpiryDate().before(new Date())) {
+            throw new TokenExpiredException("This token is expired.");
+        }
+        user.setEnabled(true);
+    }
+
+    @Override
+    @Transactional
     public User findByID(Long id) {
         log.info("Finding user with ID = " + id);
         Optional<User> userOptional = userRepository.findById(id);
@@ -92,7 +113,10 @@ public class UserServiceImpl implements UserService {
             throw new ExistsException("User with email \"" + user.getEmail() + "\" already exists.");
         }
         cacheService.remove(ALL_USERS);
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        String token = verificationTokenService.createNewTokenForUser(savedUser);
+        emailService.sendConfirmationEmail(user.getEmail(), token);
+        return savedUser;
     }
 
     @Override

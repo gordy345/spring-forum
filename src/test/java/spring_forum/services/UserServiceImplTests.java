@@ -27,6 +27,12 @@ class UserServiceImplTests {
     private CacheService cacheService;
 
     @Mock
+    private EmailService emailService;
+
+    @Mock
+    private VerificationTokenService verificationTokenService;
+
+    @Mock
     private Producer producer;
 
     private UserService userService;
@@ -35,7 +41,7 @@ class UserServiceImplTests {
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository, cacheService, producer);
+        userService = new UserServiceImpl(userRepository, emailService, cacheService, verificationTokenService, producer);
     }
 
     @Test

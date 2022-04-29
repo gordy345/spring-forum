@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import spring_forum.converters.UserConverter;
 import spring_forum.domain.User;
+import spring_forum.dtos.RegisterDTO;
 import spring_forum.dtos.UserDTO;
 import spring_forum.services.CacheService;
 import spring_forum.services.ImageService;
@@ -16,6 +17,7 @@ import spring_forum.utils.Utils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 import java.io.IOException;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,16 +80,18 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDTO saveUser(@Valid @RequestBody UserDTO userDTO, HttpServletRequest request) {
-        if (userDTO.getCountry() == null) {
-            userDTO.setCountry(GeoUtils.getCountryByIp(request.getRemoteHost()));
+    public UserDTO saveUser(@Valid @RequestBody RegisterDTO registerDTO, HttpServletRequest request) {
+        if (!registerDTO.getPassword().equals(registerDTO.getConfirmPassword())) {
+            throw new ValidationException("Passwords don't match");
         }
-        if (userDTO.getLanguage() == null) {
-            userDTO.setLanguage(GeoUtils.getLanguageByCountry(userDTO.getCountry()));
+        if (registerDTO.getCountry() == null) {
+            registerDTO.setCountry(GeoUtils.getCountryByIp(request.getRemoteHost()));
         }
-        User savedUser = userService.save(userConverter.convertToUser(userDTO));
-        userDTO.setId(savedUser.getId());
-        return userDTO;
+        if (registerDTO.getLanguage() == null) {
+            registerDTO.setLanguage(GeoUtils.getLanguageByCountry(registerDTO.getCountry()));
+        }
+        User savedUser = userService.save(userConverter.convertToUser(registerDTO));
+        return userConverter.convertToUserDTO(savedUser);
     }
 
     @PutMapping
@@ -143,5 +147,11 @@ public class UserController {
         } catch (IOException e) {
             return errorMessage;
         }
+    }
+
+    @GetMapping("/confirm-account")
+    public String confirmEmailForUser(@RequestParam("token") String token) {
+        userService.enableUser(token);
+        return "You've successfully enabled your account!";
     }
 }
