@@ -154,4 +154,16 @@ public class UserController {
         userService.enableUser(token);
         return "You've successfully enabled your account!";
     }
+
+    @GetMapping("/enable/{userId}")
+    public String enableUser(@PathVariable Long userId) {
+        userService.enableUser(userId);
+        return "User've been enabled!";
+    }
+
+    @GetMapping("/disable/{userId}")
+    public String disableUser(@PathVariable Long userId) {
+        userService.disableUser(userId);
+        return "User've been disabled!";
+    }
 }

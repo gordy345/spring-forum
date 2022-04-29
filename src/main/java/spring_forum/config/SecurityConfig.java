@@ -19,6 +19,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/users").permitAll()
                 .antMatchers(HttpMethod.GET, "/users/confirm-account").permitAll()
+                .antMatchers("/users/enable/*", "/users/disable/*").hasAuthority("MODERATOR")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()

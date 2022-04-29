@@ -94,6 +94,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public void enableUser(Long id) {
+        log.info("Enabling user with ID = " + id);
+        User user = findByID(id);
+        user.setEnabled(true);
+    }
+
+    @Override
+    @Transactional
+    public void disableUser(Long id) {
+        log.info("Disabling user with ID = " + id);
+        User user = findByID(id);
+        user.setEnabled(false);
+    }
+
+    @Override
+    @Transactional
     public User findByID(Long id) {
         log.info("Finding user with ID = " + id);
         Optional<User> userOptional = userRepository.findById(id);
