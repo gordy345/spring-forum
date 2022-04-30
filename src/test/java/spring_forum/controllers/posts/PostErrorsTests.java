@@ -27,7 +27,7 @@ public class PostErrorsTests {
     public void findPostsByTagWithErrorTest() {
         given()
                 .when().get(DEFAULT_URL + "/tag/-1n").then()
-                .body(equalTo("There are no posts with this tag."))
+                .body(equalTo("There are no posts with tag \"-1n\"."))
                 .statusCode(400);
     }
 

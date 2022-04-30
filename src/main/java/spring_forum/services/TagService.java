@@ -8,4 +8,6 @@ public interface TagService extends CrudService<Tag, Long> {
 
     Set<Tag> findTagsForPostByID(Long postID);
 
+    Tag deleteTagForPost(Long tagId, Long postId);
+
 }

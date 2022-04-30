@@ -5,13 +5,15 @@ import spring_forum.domain.Post;
 import spring_forum.domain.Tag;
 import spring_forum.dtos.TagDTO;
 
+import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TagConverterTests {
 
     private final TagConverter tagConverter = new TagConverter();
     private final Tag tag = Tag.builder().id(1L).tag("Tag")
-            .post(Post.builder().id(1L).build())
+            .posts(Collections.singleton(Post.builder().id(1L).build()))
             .build();
     private final TagDTO tagDTO = TagDTO.builder().id(1L).tag("Tag").build();
 

@@ -75,4 +75,10 @@ public class CacheServiceImpl implements CacheService {
         keys.forEach(redisTemplate.opsForValue()::getAndDelete);
     }
 
+    @Override
+    public void deleteAllKeys() {
+        log.info("Deleting all keys in Redis");
+        redisTemplate.delete(redisTemplate.keys("*"));
+    }
+
 }

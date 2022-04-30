@@ -38,8 +38,7 @@ public class TagValidTests {
     public void findByIdValidTest() {
         given()
                 .when().get(DEFAULT_URL + "/1").then()
-                .body("tag", equalTo("firstTag"))
-                .body("postID", equalTo(1))
+                .body(equalTo("firstTag"))
                 .statusCode(200);
     }
 
@@ -56,8 +55,9 @@ public class TagValidTests {
 
         given()
                 .pathParam("tagID", id)
-                .when().delete(DEFAULT_URL + "/{tagID}").then()
-                .body(equalTo("Tag with ID = " + id + " was deleted."))
+                .pathParam("postID", tag.getPostID())
+                .when().delete(DEFAULT_URL + "/{tagID}/post/{postID}").then()
+                .body(equalTo("Tag with ID = " + id + " was deleted for post with ID = " + tag.getPostID()))
                 .statusCode(200);
     }
 

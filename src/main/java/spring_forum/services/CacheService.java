@@ -16,4 +16,6 @@ public interface CacheService {
     void remove(String... keys);
 
     void remove(List<String> keys);
+
+    void deleteAllKeys();
 }

@@ -9,9 +9,11 @@ import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
 import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.PostRepository;
+import spring_forum.repositories.TagRepository;
 
 import javax.transaction.Transactional;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,12 +26,14 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final UserService userService;
+    private final TagRepository tagRepository;
     private final CacheService cacheService;
     private final Producer producer;
 
-    public PostServiceImpl(PostRepository postRepository, UserService userService, CacheService cacheService, Producer producer) {
+    public PostServiceImpl(PostRepository postRepository, UserService userService, TagRepository tagRepository, CacheService cacheService, Producer producer) {
         this.postRepository = postRepository;
         this.userService = userService;
+        this.tagRepository = tagRepository;
         this.cacheService = cacheService;
         this.producer = producer;
     }
@@ -66,13 +70,17 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Set<Post> findPostsByTag(String tag) {
         log.info("Finding posts with tag: " + tag);
-        Set<Post> posts = findAll().stream()
-                .filter(post -> post.getTags().contains(Tag.builder().tag(tag).build()))
-                .collect(Collectors.toSet());
+        log.info("Finding tag with tag value = " + tag);
+        Tag foundTag = tagRepository.findTagByTag(tag);
+        String errorMessage = "There are no posts with tag \"" + tag + "\".";
+        if (foundTag == null) {
+            producer.send(errorMessage);
+            throw new NotFoundException(errorMessage);
+        }
+        Set<Post> posts = foundTag.getPosts();
         if (posts.size() == 0) {
-            String message = "There are no posts with this tag.";
-            producer.send(message);
-            throw new NotFoundException(message);
+            producer.send(errorMessage);
+            throw new NotFoundException(errorMessage);
         }
         return posts;
     }
@@ -152,7 +160,13 @@ public class PostServiceImpl implements PostService {
                 .stream()
                 .map(tag -> POSTS_BY_TAG + tag.getTag())
                 .collect(Collectors.toList()));
+        List<Tag> tagsToDelete = post.getTags()
+                .stream()
+                .filter(tag -> tag.getPosts().size() == 1)
+                .collect(Collectors.toList());
+        post.getTags().clear();
         postRepository.delete(post);
+        tagRepository.deleteAll(tagsToDelete);
         return post;
     }
 

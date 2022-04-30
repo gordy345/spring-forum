@@ -85,7 +85,7 @@ public class TagErrorsTests {
     @Test
     public void deleteTagNotExistsTest() {
         given()
-                .when().delete(DEFAULT_URL + "/-1").then()
+                .when().delete(DEFAULT_URL + "/-1/post/1").then()
                 .body(equalTo("Tag with ID = -1 doesn't exist."))
                 .statusCode(400);
     }

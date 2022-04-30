@@ -6,7 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @SuppressWarnings("ALL")
 @Getter
@@ -19,16 +21,15 @@ public class Tag extends BaseEntity {
     @Column(name = "tag")
     private String tag;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private Post post;
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "tags")
+    private Set<Post> posts = new HashSet<>();
 
     @Builder
-    public Tag(Long id, String tag, Post post) {
+    public Tag(Long id, String tag, Set<Post> posts) {
         super(id, 0L);
         this.tag = tag;
-        if (post != null) {
-            this.post = post;
+        if (posts != null) {
+            this.posts = posts;
         }
     }
 

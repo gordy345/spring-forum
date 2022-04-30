@@ -12,8 +12,8 @@ import spring_forum.utils.Utils;
 
 import javax.validation.Valid;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toSet;
 import static spring_forum.utils.CacheKeys.TAGS_FOR_POST;
 import static spring_forum.utils.CacheKeys.TAG_BY_ID;
 
@@ -40,8 +40,12 @@ public class TagController {
             return cacheService.get(cacheKey);
         }
         Set<TagDTO> tagDTOS = tagService.findTagsForPostByID(id).stream()
-                .map(tagConverter::convertToTagDTO)
-                .collect(Collectors.toSet());
+                .map(tag -> {
+                    TagDTO tagDTO = tagConverter.convertToTagDTO(tag);
+                    tagDTO.setPostID(id);
+                    return tagDTO;
+                })
+                .collect(toSet());
         String jsonResult = Utils.convertToJson(tagDTOS);
         cacheService.put(cacheKey, jsonResult);
         return jsonResult;
@@ -53,17 +57,16 @@ public class TagController {
         if (cacheService.containsKey(cacheKey)) {
             return cacheService.get(cacheKey);
         }
-        TagDTO tagDTO = tagConverter.convertToTagDTO(tagService.findByID(id));
-        String jsonResult = Utils.convertToJson(tagDTO);
-        cacheService.put(cacheKey, jsonResult);
-        return jsonResult;
+        String result = tagService.findByID(id).getTag();
+        cacheService.put(cacheKey, result);
+        return result;
     }
 
     @PostMapping
     public TagDTO saveTag(@Valid @RequestBody TagDTO tagDTO) {
         Post postByID = postService.findByID(tagDTO.getPostID());
         Tag tagToSave = tagConverter.convertToTag(tagDTO);
-        tagToSave.setPost(postByID);
+        tagToSave.getPosts().add(postByID);
         Tag savedTag = tagService.save(tagToSave);
         tagDTO.setId(savedTag.getId());
         return tagDTO;
@@ -73,14 +76,14 @@ public class TagController {
     public TagDTO updateTag(@Valid @RequestBody TagDTO tagDTO) {
         Post postByID = postService.findByID(tagDTO.getPostID());
         Tag tagToUpdate = tagConverter.convertToTag(tagDTO);
-        tagToUpdate.setPost(postByID);
+        tagToUpdate.getPosts().add(postByID);
         tagService.update(tagToUpdate);
         return tagDTO;
     }
 
-    @DeleteMapping("/{id}")
-    public String deleteTag(@PathVariable Long id) {
-        tagService.deleteByID(id);
-        return "Tag with ID = " + id + " was deleted.";
+    @DeleteMapping("/{id}/post/{postId}")
+    public String deleteTag(@PathVariable Long id, @PathVariable Long postId) {
+        tagService.deleteTagForPost(id, postId);
+        return "Tag with ID = " + id + " was deleted for post with ID = " + postId;
     }
 }

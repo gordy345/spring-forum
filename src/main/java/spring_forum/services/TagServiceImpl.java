@@ -10,8 +10,10 @@ import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.TagRepository;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static spring_forum.utils.CacheKeys.POSTS_BY_TAG;
 import static spring_forum.utils.CacheKeys.TAGS_FOR_POST;
@@ -48,6 +50,20 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
+    public Tag deleteTagForPost(Long tagId, Long postId) {
+        log.info("Deleting tag with ID = " + tagId + " for post with ID = " + postId);
+        Tag tag = findByID(tagId);
+        Post post = postService.findByID(postId);
+        post.getTags().remove(tag);
+        if (tag.getPosts().size() == 1) {
+            tagRepository.deleteById(tagId);
+        }
+        cacheService.remove(TAGS_FOR_POST + post.getId(), POSTS_BY_TAG + tag.getTag());
+        return tag;
+    }
+
+    @Override
+    @Transactional
     public Tag findByID(Long id) {
         log.info("Finding tag with ID = " + id);
         Optional<Tag> tagOptional = tagRepository.findById(id);
@@ -63,13 +79,16 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public Tag save(Tag tag) {
         log.info("Saving tag: " + tag.getTag());
-        if (tag.getPost().getTags().contains(tag)) {
+        Post post = tag.getPosts().iterator().next();
+        if (post.getTags().contains(tag)) {
             throw new ExistsException("Tag you're trying to save already exists for post with ID = "
-                    + tag.getPost().getId());
+                    + post.getId());
         }
-        cacheService.remove(TAGS_FOR_POST + tag.getPost().getId(),
+        cacheService.remove(TAGS_FOR_POST + post.getId(),
                 POSTS_BY_TAG + tag.getTag());
-        return tagRepository.save(tag);
+        Tag savedTag = tagRepository.save(tag);
+        post.getTags().add(savedTag);
+        return savedTag;
     }
 
     @Override
@@ -77,16 +96,20 @@ public class TagServiceImpl implements TagService {
     public Tag update(Tag tag) {
         log.info("Updating tag with ID = " + tag.getId());
         Tag tagByID = findByID(tag.getId());
-        if (tag.getPost().getTags().contains(tag)) {
-            throw new ExistsException("Tag you're trying to save already exists for post with ID = "
-                    + tag.getPost().getId());
+        Post post = tag.getPosts().iterator().next();
+        if (!tagByID.getPosts().contains(post)) {
+            String message = "Post with ID = " + post.getId() + " doesn't contain this tag";
+            producer.send(message);
+            throw new NotFoundException(message);
         }
-        cacheService.remove(TAGS_FOR_POST + tag.getPost().getId(),
-                TAGS_FOR_POST + tagByID.getPost().getId(),
-                POSTS_BY_TAG + tag.getTag());
+        if (post.getTags().contains(tag)) {
+            throw new ExistsException("Tag you're trying to save already exists for post with ID = "
+                    + post.getId());
+        }
+        cacheService.remove(TAGS_FOR_POST + post.getId(),
+                POSTS_BY_TAG + tag.getTag(), POSTS_BY_TAG + tagByID.getTag());
         tagByID.setTag(tag.getTag());
-        tagByID.setPost(tag.getPost());
-        return tagByID;
+        return tag;
     }
 
     @Override
@@ -94,8 +117,12 @@ public class TagServiceImpl implements TagService {
     public Tag deleteByID(Long id) {
         log.info("Deleting tag with ID = " + id);
         Tag tag = findByID(id);
-        cacheService.remove(TAGS_FOR_POST + tag.getPost().getId(),
-                POSTS_BY_TAG + tag.getTag());
+        List<String> keysList = tag.getPosts()
+                .stream()
+                .map(post -> TAGS_FOR_POST + post.getId())
+                .collect(Collectors.toList());
+        cacheService.remove(keysList);
+        cacheService.remove(POSTS_BY_TAG + tag.getTag());
         tagRepository.delete(tag);
         return tag;
     }

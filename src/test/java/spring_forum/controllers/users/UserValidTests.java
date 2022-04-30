@@ -60,7 +60,7 @@ public class UserValidTests {
                 .statusCode(200);
     }
 
-    @Test
+//    @Test
     public void saveAndDeleteUserValidTest() {
         UserDTO user = UserDTO.builder().name("Ivan").email("vanya333@ya.ru").isModerator(false)
                 .gender(Gender.M).phoneNumber("+79875463773").country("Russia").language("ru")

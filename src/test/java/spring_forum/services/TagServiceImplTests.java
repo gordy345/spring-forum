@@ -12,6 +12,7 @@ import spring_forum.exceptions.NotFoundException;
 import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.TagRepository;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -41,7 +42,7 @@ class TagServiceImplTests {
     private TagService tagService;
 
     private final Tag tag = Tag.builder().id(1L).tag("Test")
-            .post(Post.builder().id(1L).build()).build();
+            .posts(Collections.singleton(Post.builder().id(1L).build())).build();
 
     @BeforeEach
     void setUp() {
@@ -81,11 +82,11 @@ class TagServiceImplTests {
     @Test
     void update() {
         when(tagRepository.findById(anyLong())).thenReturn(
-                Optional.of(Tag.builder().id(1L).post(tag.getPost()).build()));
+                Optional.of(Tag.builder().id(1L).posts(tag.getPosts()).build()));
         Tag updatedTag = tagService.update(tag);
         assertEquals(1L, updatedTag.getId());
         assertEquals("Test", updatedTag.getTag());
-        assertEquals(1L, updatedTag.getPost().getId());
+        assertEquals(1L, updatedTag.getPosts().iterator().next().getId());
         verify(tagRepository).findById(anyLong());
     }
 
@@ -128,7 +129,7 @@ class TagServiceImplTests {
     void saveWithError() {
         Set<Tag> tagsForPost = Set.of(Tag.builder().tag("tag").build());
         Post relatedPost = Post.builder().id(1L).tags(tagsForPost).build();
-        Tag tagToSave = Tag.builder().tag("tag").post(relatedPost).build();
+        Tag tagToSave = Tag.builder().tag("tag").posts(Collections.singleton(relatedPost)).build();
         ExistsException exception = assertThrows(ExistsException.class,
                 () -> tagService.save(tagToSave));
         assertEquals("Tag you're trying to save already exists for post with ID = "
@@ -146,10 +147,11 @@ class TagServiceImplTests {
 
     @Test
     void updateWithError2() {
-        when(tagRepository.findById(anyLong())).thenReturn(Optional.of(Tag.builder().build()));
         Set<Tag> tagsForPost = Set.of(Tag.builder().tag("tag").build());
         Post relatedPost = Post.builder().id(1L).tags(tagsForPost).build();
-        Tag tagToUpdate = Tag.builder().id(1L).tag("tag").post(relatedPost).build();
+        when(tagRepository.findById(anyLong())).thenReturn
+                (Optional.of(Tag.builder().posts(Collections.singleton(relatedPost)).build()));
+        Tag tagToUpdate = Tag.builder().id(1L).tag("tag").posts(Collections.singleton(relatedPost)).build();
         ExistsException exception = assertThrows(ExistsException.class,
                 () -> tagService.update(tagToUpdate));
         assertEquals("Tag you're trying to save already exists for post with ID = "

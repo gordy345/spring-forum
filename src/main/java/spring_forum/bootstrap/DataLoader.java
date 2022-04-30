@@ -8,10 +8,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import spring_forum.domain.*;
 import spring_forum.repositories.PostRepository;
+import spring_forum.repositories.TagRepository;
 import spring_forum.repositories.UserRepository;
 import spring_forum.repositories.VerificationTokenRepository;
-import spring_forum.services.PostService;
-import spring_forum.services.UserService;
+import spring_forum.services.CacheService;
 
 import javax.annotation.PreDestroy;
 import javax.transaction.Transactional;
@@ -24,18 +24,18 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final TagRepository tagRepository;
     private final VerificationTokenRepository verificationTokenRepository;
-    private final UserService userService;
-    private final PostService postService;
     private final PasswordEncoder passwordEncoder;
+    private final CacheService cacheService;
 
-    public DataLoader(UserRepository userRepository, PostRepository postRepository, VerificationTokenRepository verificationTokenRepository, UserService userService, PostService postService, PasswordEncoder passwordEncoder) {
+    public DataLoader(UserRepository userRepository, PostRepository postRepository, TagRepository tagRepository, VerificationTokenRepository verificationTokenRepository, PasswordEncoder passwordEncoder, CacheService cacheService) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
+        this.tagRepository = tagRepository;
         this.verificationTokenRepository = verificationTokenRepository;
-        this.userService = userService;
-        this.postService = postService;
         this.passwordEncoder = passwordEncoder;
+        this.cacheService = cacheService;
     }
 
     @Override
@@ -91,11 +91,11 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
         secondPost.setPostOwner(users.get(1));
 
         Tag firstTag = new Tag();
-        firstTag.setPost(firstPost);
+        firstTag.getPosts().add(firstPost);
         firstTag.setTag("firstTag");
 
         Tag secondTag = new Tag();
-        secondTag.setPost(firstPost);
+        secondTag.getPosts().add(firstPost);
         secondTag.setTag("secondTag");
 
         Comment comment = new Comment();
@@ -107,14 +107,17 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
         firstPost.getTags().add(secondTag);
         firstPost.getComments().add(comment);
 
+        secondPost.getTags().add(secondTag);
+
         return List.of(firstPost, secondPost);
     }
 
     private void removeData() {
         log.info("Removing data..");
         verificationTokenRepository.deleteAll();
-        postService.findAll().forEach(post -> postService.deleteByID(post.getId()));
-        userService.findAll().forEach(user -> userService.deleteByID(user.getId()));
+        postRepository.deleteAll();
+        tagRepository.deleteAll();
         userRepository.deleteAll();
+        cacheService.deleteAllKeys();
     }
 }
