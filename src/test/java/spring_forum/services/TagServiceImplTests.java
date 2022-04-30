@@ -23,6 +23,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static spring_forum.TestConstants.*;
+import static spring_forum.utils.ExceptionMessages.*;
 
 @ExtendWith(MockitoExtension.class)
 class TagServiceImplTests {
@@ -41,9 +43,6 @@ class TagServiceImplTests {
 
     private TagService tagService;
 
-    private final Tag tag = Tag.builder().id(1L).tag("Test")
-            .posts(Collections.singleton(Post.builder().id(1L).build())).build();
-
     @BeforeEach
     void setUp() {
         tagService = new TagServiceImpl(tagRepository, postService, cacheService, producer);
@@ -52,7 +51,7 @@ class TagServiceImplTests {
     @Test
     void findTagsForPostByID() {
         Set<Tag> tagsForPost = new HashSet<>();
-        tagsForPost.add(tag);
+        tagsForPost.add(TAG);
         Post postToReturn = Post.builder().id(1L).tags(tagsForPost).build();
         when(postService.findByID(anyLong())).thenReturn(postToReturn);
         Set<Tag> tags = tagService.findTagsForPostByID(1L);
@@ -63,7 +62,7 @@ class TagServiceImplTests {
 
     @Test
     void findByID() {
-        when(tagRepository.findById(anyLong())).thenReturn(Optional.of(tag));
+        when(tagRepository.findById(anyLong())).thenReturn(Optional.of(TAG));
         Tag receivedTag = tagService.findByID(1L);
         assertEquals(1L, receivedTag.getId());
         assertEquals("Test", receivedTag.getTag());
@@ -72,8 +71,8 @@ class TagServiceImplTests {
 
     @Test
     void save() {
-        when(tagRepository.save(any())).thenReturn(tag);
-        Tag savedTag = tagService.save(tag);
+        when(tagRepository.save(any())).thenReturn(TAG);
+        Tag savedTag = tagService.save(TAG);
         assertEquals(1L, savedTag.getId());
         assertEquals("Test", savedTag.getTag());
         verify(tagRepository).save(any(Tag.class));
@@ -82,8 +81,8 @@ class TagServiceImplTests {
     @Test
     void update() {
         when(tagRepository.findById(anyLong())).thenReturn(
-                Optional.of(Tag.builder().id(1L).posts(tag.getPosts()).build()));
-        Tag updatedTag = tagService.update(tag);
+                Optional.of(Tag.builder().id(1L).posts(TAG.getPosts()).build()));
+        Tag updatedTag = tagService.update(TAG);
         assertEquals(1L, updatedTag.getId());
         assertEquals("Test", updatedTag.getTag());
         assertEquals(1L, updatedTag.getPosts().iterator().next().getId());
@@ -92,7 +91,7 @@ class TagServiceImplTests {
 
     @Test
     void deleteByID() {
-        when(tagRepository.findById(anyLong())).thenReturn(Optional.of(tag));
+        when(tagRepository.findById(anyLong())).thenReturn(Optional.of(TAG));
         tagService.deleteByID(1L);
         verify(tagRepository).findById(anyLong());
         verify(tagRepository).delete(any(Tag.class));
@@ -100,10 +99,10 @@ class TagServiceImplTests {
 
     @Test
     void findTagsForPostWithError1() {
-        when(postService.findByID(anyLong())).thenThrow(new NotFoundException("There is no post with ID = -1"));
+        when(postService.findByID(anyLong())).thenThrow(new NotFoundException(POST_NOT_FOUND_BY_ID + NEGATIVE_ID));
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> tagService.findTagsForPostByID(-1L));
-        assertEquals("There is no post with ID = -1", exception.getMessage());
+                () -> tagService.findTagsForPostByID(NEGATIVE_ID));
+        assertEquals(POST_NOT_FOUND_BY_ID + NEGATIVE_ID, exception.getMessage());
         verify(postService).findByID(anyLong());
     }
 
@@ -111,8 +110,8 @@ class TagServiceImplTests {
     void findTagsForPostWithError2() {
         when(postService.findByID(anyLong())).thenReturn(Post.builder().build());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> tagService.findTagsForPostByID(1L));
-        assertEquals("There are no tags for this post.", exception.getMessage());
+                () -> tagService.findTagsForPostByID(POST.getId()));
+        assertEquals(NO_TAGS_FOR_POST + POST.getId(), exception.getMessage());
         verify(postService).findByID(anyLong());
     }
 
@@ -120,8 +119,8 @@ class TagServiceImplTests {
     void findByIDWithError() {
         when(tagRepository.findById(anyLong())).thenReturn(Optional.empty());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> tagService.findByID(-1L));
-        assertEquals("Tag with ID = -1 doesn't exist.", exception.getMessage());
+                () -> tagService.findByID(NEGATIVE_ID));
+        assertEquals(TAG_NOT_FOUND_BY_ID + NEGATIVE_ID, exception.getMessage());
         verify(tagRepository).findById(anyLong());
     }
 
@@ -132,16 +131,15 @@ class TagServiceImplTests {
         Tag tagToSave = Tag.builder().tag("tag").posts(Collections.singleton(relatedPost)).build();
         ExistsException exception = assertThrows(ExistsException.class,
                 () -> tagService.save(tagToSave));
-        assertEquals("Tag you're trying to save already exists for post with ID = "
-                + relatedPost.getId(), exception.getMessage());
+        assertEquals(TAG_EXISTS_FOR_POST + relatedPost.getId(), exception.getMessage());
     }
 
     @Test
     void updateWithError1() {
         when(tagRepository.findById(anyLong())).thenReturn(Optional.empty());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> tagService.update(tag));
-        assertEquals("Tag with ID = " + tag.getId() + " doesn't exist.", exception.getMessage());
+                () -> tagService.update(TAG));
+        assertEquals(TAG_NOT_FOUND_BY_ID + TAG.getId(), exception.getMessage());
         verify(tagRepository).findById(anyLong());
     }
 
@@ -154,8 +152,7 @@ class TagServiceImplTests {
         Tag tagToUpdate = Tag.builder().id(1L).tag("tag").posts(Collections.singleton(relatedPost)).build();
         ExistsException exception = assertThrows(ExistsException.class,
                 () -> tagService.update(tagToUpdate));
-        assertEquals("Tag you're trying to save already exists for post with ID = "
-                + relatedPost.getId(), exception.getMessage());
+        assertEquals(TAG_EXISTS_FOR_POST + relatedPost.getId(), exception.getMessage());
         verify(tagRepository).findById(anyLong());
     }
 
@@ -163,8 +160,8 @@ class TagServiceImplTests {
     void deleteWithError() {
         when(tagRepository.findById(anyLong())).thenReturn(Optional.empty());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> tagService.deleteByID(-1L));
-        assertEquals("Tag with ID = -1 doesn't exist.", exception.getMessage());
+                () -> tagService.deleteByID(NEGATIVE_ID));
+        assertEquals(TAG_NOT_FOUND_BY_ID + NEGATIVE_ID, exception.getMessage());
         verify(tagRepository).findById(anyLong());
     }
 }

@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static spring_forum.utils.CacheKeys.*;
+import static spring_forum.utils.ExceptionMessages.*;
 
 @Slf4j
 @Service
@@ -44,9 +45,8 @@ public class UserServiceImpl implements UserService {
         Set<User> users = new LinkedHashSet<>();
         userRepository.findAll().forEach(users::add);
         if (users.size() == 0) {
-            String message = "There are no users now.";
-            producer.send(message);
-            throw new NotFoundException(message);
+            producer.send(NO_USERS);
+            throw new NotFoundException(NO_USERS);
         }
         return users;
     }
@@ -57,7 +57,7 @@ public class UserServiceImpl implements UserService {
         log.info("Finding user by email: " + email);
         Optional<User> userOptional = userRepository.findUserByEmail(email);
         if (userOptional.isEmpty()) {
-            String message = "User with email \"" + email + "\" doesn't exist.";
+            String message = USER_NOT_FOUND_BY_EMAIL + email;
             producer.send(message);
             throw new NotFoundException(message);
         }
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
         verificationTokenService.deleteTokenByValue(token);
         log.info("Enabling user with ID = " + user.getId());
         if (foundToken.getExpiryDate().before(new Date())) {
-            throw new TokenExpiredException("This token is expired.");
+            throw new TokenExpiredException(TOKEN_EXPIRED);
         }
         user.setEnabled(true);
     }
@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService {
         log.info("Finding user with ID = " + id);
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isEmpty()) {
-            String message = "User with ID = " + id + " doesn't exist.";
+            String message = USER_NOT_FOUND_BY_ID + id;
             producer.send(message);
             throw new NotFoundException(message);
         }
@@ -126,7 +126,7 @@ public class UserServiceImpl implements UserService {
     public User save(User user) {
         log.info("Saving user with email: " + user.getEmail());
         if (userRepository.findUserByEmail(user.getEmail()).isPresent()) {
-            throw new ExistsException("User with email \"" + user.getEmail() + "\" already exists.");
+            throw new ExistsException(USER_EXISTS_WITH_EMAIL + user.getEmail());
         }
         cacheService.remove(ALL_USERS);
         User savedUser = userRepository.save(user);
@@ -142,7 +142,7 @@ public class UserServiceImpl implements UserService {
         User userByID = findByID(user.getId());
         if (!userByID.getEmail().equals(user.getEmail()) &&
                 userRepository.findUserByEmail(user.getEmail()).isPresent()) {
-            throw new ExistsException("User with email \"" + user.getEmail() + "\" already exists.");
+            throw new ExistsException(USER_EXISTS_WITH_EMAIL + user.getEmail());
         }
         cacheService.remove(ALL_USERS, USER_BY_ID + user.getId(),
                 USER_BY_EMAIL + userByID.getEmail());

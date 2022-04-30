@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import static spring_forum.utils.CacheKeys.POSTS_BY_TAG;
 import static spring_forum.utils.CacheKeys.TAGS_FOR_POST;
+import static spring_forum.utils.ExceptionMessages.*;
 
 @Slf4j
 @Service
@@ -41,7 +42,7 @@ public class TagServiceImpl implements TagService {
         Post post = postService.findByID(postID);
         Set<Tag> tags = post.getTags();
         if (tags.size() == 0) {
-            String message = "There are no tags for this post.";
+            String message = NO_TAGS_FOR_POST + postID;
             producer.send(message);
             throw new NotFoundException(message);
         }
@@ -68,7 +69,7 @@ public class TagServiceImpl implements TagService {
         log.info("Finding tag with ID = " + id);
         Optional<Tag> tagOptional = tagRepository.findById(id);
         if (tagOptional.isEmpty()) {
-            String message = "Tag with ID = " + id + " doesn't exist.";
+            String message = TAG_NOT_FOUND_BY_ID + id;
             producer.send(message);
             throw new NotFoundException(message);
         }
@@ -81,8 +82,7 @@ public class TagServiceImpl implements TagService {
         log.info("Saving tag: " + tag.getTag());
         Post post = tag.getPosts().iterator().next();
         if (post.getTags().contains(tag)) {
-            throw new ExistsException("Tag you're trying to save already exists for post with ID = "
-                    + post.getId());
+            throw new ExistsException(TAG_EXISTS_FOR_POST + post.getId());
         }
         cacheService.remove(TAGS_FOR_POST + post.getId(),
                 POSTS_BY_TAG + tag.getTag());
@@ -98,13 +98,12 @@ public class TagServiceImpl implements TagService {
         Tag tagByID = findByID(tag.getId());
         Post post = tag.getPosts().iterator().next();
         if (!tagByID.getPosts().contains(post)) {
-            String message = "Post with ID = " + post.getId() + " doesn't contain this tag";
+            String message = POST_DOESNT_CONTAIN_TAG + post.getId();
             producer.send(message);
             throw new NotFoundException(message);
         }
         if (post.getTags().contains(tag)) {
-            throw new ExistsException("Tag you're trying to save already exists for post with ID = "
-                    + post.getId());
+            throw new ExistsException(TAG_EXISTS_FOR_POST + post.getId());
         }
         cacheService.remove(TAGS_FOR_POST + post.getId(),
                 POSTS_BY_TAG + tag.getTag(), POSTS_BY_TAG + tagByID.getTag());

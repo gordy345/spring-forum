@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static spring_forum.utils.CacheKeys.*;
+import static spring_forum.utils.ExceptionMessages.*;
 
 @Slf4j
 @Service
@@ -45,9 +46,8 @@ public class PostServiceImpl implements PostService {
         Set<Post> posts = new LinkedHashSet<>();
         postRepository.findAll().forEach(posts::add);
         if (posts.size() == 0) {
-            String message = "There are no posts now.";
-            producer.send(message);
-            throw new NotFoundException(message);
+            producer.send(NO_POSTS);
+            throw new NotFoundException(NO_POSTS);
         }
         return posts;
     }
@@ -59,7 +59,7 @@ public class PostServiceImpl implements PostService {
         User user = userService.findByID(userId);
         Set<Post> posts = user.getPosts();
         if (posts.size() == 0) {
-            String message = "There are no posts for this user.";
+            String message = NO_POSTS_FOR_USER + userId;
             producer.send(message);
             throw new NotFoundException(message);
         }
@@ -72,7 +72,7 @@ public class PostServiceImpl implements PostService {
         log.info("Finding posts with tag: " + tag);
         log.info("Finding tag with tag value = " + tag);
         Tag foundTag = tagRepository.findTagByTag(tag);
-        String errorMessage = "There are no posts with tag \"" + tag + "\".";
+        String errorMessage = NO_POSTS_WITH_TAG + tag;
         if (foundTag == null) {
             producer.send(errorMessage);
             throw new NotFoundException(errorMessage);
@@ -91,7 +91,7 @@ public class PostServiceImpl implements PostService {
         log.info("Finding post with title: " + title);
         Optional<Post> postOptional = postRepository.findPostByTitle(title);
         if (postOptional.isEmpty()) {
-            String message = "Post with title \"" + title + "\" doesn't exist.";
+            String message = POST_NOT_FOUND_BY_TITLE + title;
             producer.send(message);
             throw new NotFoundException(message);
         }
@@ -104,7 +104,7 @@ public class PostServiceImpl implements PostService {
         log.info("Finding post with ID = " + id);
         Optional<Post> postOptional = postRepository.findById(id);
         if (postOptional.isEmpty()) {
-            String message = "There is no post with ID = " + id;
+            String message = POST_NOT_FOUND_BY_ID + id;
             producer.send(message);
             throw new NotFoundException(message);
         }
@@ -116,7 +116,7 @@ public class PostServiceImpl implements PostService {
     public Post save(Post post) {
         log.info("Saving post with title: " + post.getTitle());
         if (postRepository.findPostByTitle(post.getTitle()).isPresent()) {
-            throw new ExistsException("Post with title \"" + post.getTitle() + "\" already exists.");
+            throw new ExistsException(POST_EXISTS_WITH_TITLE + post.getTitle());
         }
         cacheService.remove(ALL_POSTS,
                 POSTS_FOR_USER + post.getPostOwner().getId());
@@ -130,7 +130,7 @@ public class PostServiceImpl implements PostService {
         Post postByID = findByID(post.getId());
         if (!postByID.getTitle().equals(post.getTitle()) &&
                 postRepository.findPostByTitle(post.getTitle()).isPresent()) {
-            throw new ExistsException("Post with title \"" + post.getTitle() + "\" already exists.");
+            throw new ExistsException(POST_EXISTS_WITH_TITLE + post.getTitle());
         }
         cacheService.remove(ALL_POSTS,
                 POSTS_FOR_USER + postByID.getPostOwner().getId(),

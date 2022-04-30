@@ -14,6 +14,8 @@ import java.util.Set;
 
 import static spring_forum.utils.CacheKeys.COMMENTS_FOR_POST;
 import static spring_forum.utils.CacheKeys.COMMENT_BY_ID;
+import static spring_forum.utils.ExceptionMessages.COMMENT_NOT_FOUND_BY_ID;
+import static spring_forum.utils.ExceptionMessages.NO_COMMENTS_FOR_POST;
 
 @Slf4j
 @Service
@@ -38,7 +40,7 @@ public class CommentServiceImpl implements CommentService {
         Post post = postService.findByID(postID);
         Set<Comment> comments = post.getComments();
         if(comments.size() == 0) {
-            String message = "There are no comments for this post.";
+            String message = NO_COMMENTS_FOR_POST + postID;
             producer.send(message);
             throw new NotFoundException(message);
         }
@@ -51,7 +53,7 @@ public class CommentServiceImpl implements CommentService {
         log.info("Finding comment with ID = " + id);
         Optional<Comment> commentOptional = commentRepository.findById(id);
         if (commentOptional.isEmpty()) {
-            String message = "Comment with ID = " + id + " doesn't exist.";
+            String message = COMMENT_NOT_FOUND_BY_ID + id;
             producer.send(message);
             throw new NotFoundException(message);
         }
@@ -61,7 +63,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public Comment save(Comment comment) {
-        log.info("Saving new comment..");
+        log.info("Saving new comment with text: " + comment.getText());
         cacheService.remove(COMMENTS_FOR_POST + comment.getPost().getId());
         return commentRepository.save(comment);
     }

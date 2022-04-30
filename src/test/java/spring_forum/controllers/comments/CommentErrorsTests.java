@@ -8,6 +8,8 @@ import spring_forum.dtos.CommentDTO;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static spring_forum.TestConstants.NEGATIVE_ID;
+import static spring_forum.utils.ExceptionMessages.*;
 
 @ActiveProfiles(value = "test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -18,7 +20,7 @@ public class CommentErrorsTests {
     @Test
     void findByIDWithErrorTest() {
         given().when().get(DEFAULT_URL + "/-1").then()
-                .body(equalTo("Comment with ID = -1 doesn't exist."))
+                .body(equalTo(COMMENT_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 
@@ -26,7 +28,7 @@ public class CommentErrorsTests {
     public void findCommentsForPostWithErrorTest() {
         given()
                 .when().get(DEFAULT_URL + "/post/-1").then()
-                .body(equalTo("There is no post with ID = -1"))
+                .body(equalTo(POST_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 
@@ -37,7 +39,7 @@ public class CommentErrorsTests {
                 .contentType(ContentType.JSON)
                 .body(comment)
                 .when().post(DEFAULT_URL).then()
-                .body(equalTo("User with ID = -1 doesn't exist."))
+                .body(equalTo(USER_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 
@@ -48,19 +50,19 @@ public class CommentErrorsTests {
                 .contentType(ContentType.JSON)
                 .body(comment)
                 .when().post(DEFAULT_URL).then()
-                .body(equalTo("There is no post with ID = -1"))
+                .body(equalTo(POST_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 
     @Test
     public void updateCommentNotExistsTest() {
         CommentDTO comment = CommentDTO.builder().text("New Comment").postID(1L).commentOwnerID(1L).build();
-        comment.setId(-1L);
+        comment.setId(NEGATIVE_ID);
         given()
                 .contentType(ContentType.JSON)
                 .body(comment)
                 .when().put(DEFAULT_URL).then()
-                .body(equalTo("Comment with ID = -1 doesn't exist."))
+                .body(equalTo(COMMENT_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 
@@ -68,7 +70,7 @@ public class CommentErrorsTests {
     public void deleteCommentNotExistsTest() {
         given()
                 .when().delete(DEFAULT_URL + "/-1").then()
-                .body(equalTo("Comment with ID = -1 doesn't exist."))
+                .body(equalTo(COMMENT_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 }

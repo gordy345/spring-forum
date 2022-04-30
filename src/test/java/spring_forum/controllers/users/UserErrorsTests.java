@@ -10,6 +10,8 @@ import spring_forum.dtos.UserDTO;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static spring_forum.TestConstants.NEGATIVE_ID;
+import static spring_forum.utils.ExceptionMessages.*;
 
 @ActiveProfiles(value = "test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -20,14 +22,15 @@ public class UserErrorsTests {
     @Test
     public void findByIdWithErrorTest() {
         given().when().get(DEFAULT_URL + "/-1").then()
-                .body(equalTo("User with ID = -1 doesn't exist."))
+                .body(equalTo(USER_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 
     @Test
     public void findByEmailWithErrorTest() {
-        given().when().get(DEFAULT_URL + "/email/gog@ya.ru").then()
-                .body(equalTo("User with email \"gog@ya.ru\" doesn't exist."))
+        String nonExistingEmail = "gog@ya.ru";
+        given().when().get(DEFAULT_URL + "/email/" + nonExistingEmail).then()
+                .body(equalTo(USER_NOT_FOUND_BY_EMAIL + nonExistingEmail))
                 .statusCode(400);
     }
 
@@ -39,7 +42,7 @@ public class UserErrorsTests {
                 .contentType(ContentType.JSON)
                 .body(user)
                 .when().post(DEFAULT_URL).then()
-                .body(equalTo("User with email \"gogo@ya.ru\" already exists."))
+                .body(equalTo(USER_EXISTS_WITH_EMAIL + user.getEmail()))
                 .statusCode(409);
     }
 
@@ -51,7 +54,7 @@ public class UserErrorsTests {
                 .contentType(ContentType.JSON)
                 .body(user)
                 .when().put(DEFAULT_URL).then()
-                .body(equalTo("User with ID = -1 doesn't exist."))
+                .body(equalTo(USER_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 
@@ -63,7 +66,7 @@ public class UserErrorsTests {
                 .contentType(ContentType.JSON)
                 .body(user)
                 .when().put(DEFAULT_URL).then()
-                .body(equalTo("User with email \"gogo@ya.ru\" already exists."))
+                .body(equalTo(USER_EXISTS_WITH_EMAIL + user.getEmail()))
                 .statusCode(409);
     }
 
@@ -71,7 +74,7 @@ public class UserErrorsTests {
     public void deleteUserNotExistsTest() {
         given()
                 .when().delete(DEFAULT_URL + "/-1").then()
-                .body(equalTo("User with ID = -1 doesn't exist."))
+                .body(equalTo(USER_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 

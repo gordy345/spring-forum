@@ -8,6 +8,8 @@ import spring_forum.dtos.PostDTO;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static spring_forum.TestConstants.NEGATIVE_ID;
+import static spring_forum.utils.ExceptionMessages.*;
 
 @ActiveProfiles(value = "test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -19,15 +21,16 @@ public class PostErrorsTests {
     public void findPostsForUserWithErrorTest() {
         given()
                 .when().get(DEFAULT_URL + "/user/-1").then()
-                .body(equalTo("User with ID = -1 doesn't exist."))
+                .body(equalTo(USER_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 
     @Test
     public void findPostsByTagWithErrorTest() {
+        String tag = "-1n";
         given()
-                .when().get(DEFAULT_URL + "/tag/-1n").then()
-                .body(equalTo("There are no posts with tag \"-1n\"."))
+                .when().get(DEFAULT_URL + "/tag/" + tag).then()
+                .body(equalTo(NO_POSTS_WITH_TAG + tag))
                 .statusCode(400);
     }
 
@@ -35,15 +38,16 @@ public class PostErrorsTests {
     public void findByIdWithErrorTest() {
         given()
                 .when().get(DEFAULT_URL + "/-1").then()
-                .body(equalTo("There is no post with ID = -1"))
+                .body(equalTo(POST_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 
     @Test
     public void findByTitleWithErrorTest() {
+        String title = "nonExistingPost";
         given()
-                .when().get(DEFAULT_URL + "/title/nonExistingPost").then()
-                .body(equalTo("Post with title \"nonExistingPost\" doesn't exist."))
+                .when().get(DEFAULT_URL + "/title/" + title).then()
+                .body(equalTo(POST_NOT_FOUND_BY_TITLE + title))
                 .statusCode(400);
     }
 
@@ -55,7 +59,7 @@ public class PostErrorsTests {
                 .contentType(ContentType.JSON)
                 .body(post)
                 .when().post(DEFAULT_URL).then()
-                .body(equalTo("User with ID = -1 doesn't exist."))
+                .body(equalTo(USER_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 
@@ -67,7 +71,7 @@ public class PostErrorsTests {
                 .contentType(ContentType.JSON)
                 .body(post)
                 .when().post(DEFAULT_URL).then()
-                .body(equalTo("Post with title \"First post\" already exists."))
+                .body(equalTo(POST_EXISTS_WITH_TITLE + post.getTitle()))
                 .statusCode(409);
     }
 
@@ -79,7 +83,7 @@ public class PostErrorsTests {
                 .contentType(ContentType.JSON)
                 .body(post)
                 .when().put(DEFAULT_URL).then()
-                .body(equalTo("There is no post with ID = -1"))
+                .body(equalTo(POST_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 
@@ -91,7 +95,7 @@ public class PostErrorsTests {
                 .contentType(ContentType.JSON)
                 .body(post)
                 .when().put(DEFAULT_URL).then()
-                .body(equalTo("Post with title \"First post\" already exists."))
+                .body(equalTo(POST_EXISTS_WITH_TITLE + post.getTitle()))
                 .statusCode(409);
     }
 
@@ -99,7 +103,7 @@ public class PostErrorsTests {
     public void deletePostNotExistsTest() {
         given()
                 .when().delete(DEFAULT_URL + "/-1").then()
-                .body(equalTo("There is no post with ID = -1"))
+                .body(equalTo(POST_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
 }

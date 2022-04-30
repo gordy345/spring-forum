@@ -22,6 +22,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static spring_forum.TestConstants.*;
+import static spring_forum.utils.ExceptionMessages.*;
 
 @ExtendWith(MockitoExtension.class)
 class CommentServiceImplTests {
@@ -40,9 +42,6 @@ class CommentServiceImplTests {
 
     private CommentService commentService;
 
-    private final Comment comment = Comment.builder().id(1L).text("Test")
-            .post(Post.builder().id(1L).build()).build();
-
     @BeforeEach
     void setUp() {
         commentService = new CommentServiceImpl(commentRepository, postService, cacheService, producer);
@@ -51,7 +50,7 @@ class CommentServiceImplTests {
     @Test
     void findCommentsForPostByID() {
         Set<Comment> commentsForPost = new HashSet<>();
-        commentsForPost.add(comment);
+        commentsForPost.add(COMMENT);
         Post postToReturn = Post.builder().id(1L).comments(commentsForPost).build();
         when(postService.findByID(anyLong())).thenReturn(postToReturn);
         Set<Comment> comments = commentService.findCommentsForPostByID(1L);
@@ -62,7 +61,7 @@ class CommentServiceImplTests {
 
     @Test
     void findByID() {
-        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(COMMENT));
         Comment receivedComment = commentService.findByID(1L);
         assertEquals(1L, receivedComment.getId());
         assertEquals("Test", receivedComment.getText());
@@ -71,8 +70,8 @@ class CommentServiceImplTests {
 
     @Test
     void save() {
-        when(commentRepository.save(any())).thenReturn(comment);
-        Comment savedComment = commentService.save(comment);
+        when(commentRepository.save(any())).thenReturn(COMMENT);
+        Comment savedComment = commentService.save(COMMENT);
         assertEquals(1L, savedComment.getId());
         assertEquals("Test", savedComment.getText());
         verify(commentRepository).save(any(Comment.class));
@@ -82,8 +81,8 @@ class CommentServiceImplTests {
     void update() {
         when(commentRepository.findById(anyLong())).thenReturn(
                 Optional.of(Comment.builder().id(1L).build()));
-        comment.setCommentOwner(User.builder().id(1L).build());
-        Comment updatedComment = commentService.update(comment);
+        COMMENT.setCommentOwner(User.builder().id(1L).build());
+        Comment updatedComment = commentService.update(COMMENT);
         assertEquals(1L, updatedComment.getId());
         assertEquals("Test", updatedComment.getText());
         assertEquals(1L, updatedComment.getCommentOwner().getId());
@@ -92,7 +91,7 @@ class CommentServiceImplTests {
 
     @Test
     void deleteByID() {
-        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(COMMENT));
         commentService.deleteByID(1L);
         verify(commentRepository).findById(anyLong());
         verify(commentRepository).delete(any(Comment.class));
@@ -100,10 +99,10 @@ class CommentServiceImplTests {
 
     @Test
     void findCommentsForPostWithError1() {
-        when(postService.findByID(anyLong())).thenThrow(new NotFoundException("There is no post with ID = -1"));
+        when(postService.findByID(anyLong())).thenThrow(new NotFoundException(POST_NOT_FOUND_BY_ID + NEGATIVE_ID));
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> commentService.findCommentsForPostByID(-1L));
-        assertEquals("There is no post with ID = -1", exception.getMessage());
+                () -> commentService.findCommentsForPostByID(NEGATIVE_ID));
+        assertEquals(POST_NOT_FOUND_BY_ID + NEGATIVE_ID, exception.getMessage());
         verify(postService).findByID(anyLong());
     }
 
@@ -111,8 +110,8 @@ class CommentServiceImplTests {
     void findCommentsForPostWithError2() {
         when(postService.findByID(anyLong())).thenReturn(Post.builder().build());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> commentService.findCommentsForPostByID(1L));
-        assertEquals("There are no comments for this post.", exception.getMessage());
+                () -> commentService.findCommentsForPostByID(POST.getId()));
+        assertEquals(NO_COMMENTS_FOR_POST + POST.getId(), exception.getMessage());
         verify(postService).findByID(anyLong());
     }
 
@@ -120,8 +119,8 @@ class CommentServiceImplTests {
     void findByIDWithError() {
         when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> commentService.findByID(-1L));
-        assertEquals("Comment with ID = -1 doesn't exist.", exception.getMessage());
+                () -> commentService.findByID(NEGATIVE_ID));
+        assertEquals(COMMENT_NOT_FOUND_BY_ID + NEGATIVE_ID, exception.getMessage());
         verify(commentRepository).findById(anyLong());
     }
 
@@ -129,8 +128,8 @@ class CommentServiceImplTests {
     void updateWithError() {
         when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> commentService.update(comment));
-        assertEquals("Comment with ID = " + comment.getId() + " doesn't exist.", exception.getMessage());
+                () -> commentService.update(COMMENT));
+        assertEquals(COMMENT_NOT_FOUND_BY_ID + COMMENT.getId(), exception.getMessage());
         verify(commentRepository).findById(anyLong());
     }
 
@@ -138,8 +137,8 @@ class CommentServiceImplTests {
     void deleteWithError() {
         when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> commentService.deleteByID(-1L));
-        assertEquals("Comment with ID = -1 doesn't exist.", exception.getMessage());
+                () -> commentService.deleteByID(NEGATIVE_ID));
+        assertEquals(COMMENT_NOT_FOUND_BY_ID + NEGATIVE_ID, exception.getMessage());
         verify(commentRepository).findById(anyLong());
     }
 }

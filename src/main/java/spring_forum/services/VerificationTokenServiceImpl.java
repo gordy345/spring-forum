@@ -10,6 +10,8 @@ import spring_forum.repositories.VerificationTokenRepository;
 import javax.transaction.Transactional;
 import java.util.UUID;
 
+import static spring_forum.utils.ExceptionMessages.TOKEN_EXPIRED;
+
 @Slf4j
 @Service
 public class VerificationTokenServiceImpl implements VerificationTokenService {
@@ -37,7 +39,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
         VerificationToken token =
                 verificationTokenRepository.findVerificationTokenByValue(tokenVal);
         if (token == null) {
-            throw new NotFoundException("It seems like token is expired.");
+            throw new NotFoundException(TOKEN_EXPIRED);
         }
         return token;
     }

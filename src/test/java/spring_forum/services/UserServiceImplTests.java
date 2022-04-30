@@ -16,6 +16,9 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+import static spring_forum.TestConstants.NEGATIVE_ID;
+import static spring_forum.TestConstants.USER;
+import static spring_forum.utils.ExceptionMessages.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTests {
@@ -37,8 +40,6 @@ class UserServiceImplTests {
 
     private UserService userService;
 
-    private final User user = User.builder().id(1L).name("Dan").email("gogo@ya.ru").build();
-
     @BeforeEach
     void setUp() {
         userService = new UserServiceImpl(userRepository, emailService, cacheService, verificationTokenService, producer);
@@ -48,7 +49,7 @@ class UserServiceImplTests {
     void findAll() {
         User user2 = User.builder().id(2L).name("Kirill").build();
         List<User> usersToReturn = new ArrayList<>();
-        usersToReturn.add(user);
+        usersToReturn.add(USER);
         usersToReturn.add(user2);
         when(userRepository.findAll()).thenReturn(usersToReturn);
         Set<User> users = userService.findAll();
@@ -61,7 +62,7 @@ class UserServiceImplTests {
 
     @Test
     void findUserByEmail() {
-        Optional<User> userOptional = Optional.of(user);
+        Optional<User> userOptional = Optional.of(USER);
         when(userRepository.findUserByEmail(anyString())).thenReturn(userOptional);
         User receivedUser = userService.findUserByEmail("gogo@ya.ru");
         assertEquals(1L, receivedUser.getId());
@@ -72,7 +73,7 @@ class UserServiceImplTests {
 
     @Test
     void findByID() {
-        Optional<User> userOptional = Optional.of(user);
+        Optional<User> userOptional = Optional.of(USER);
         when(userRepository.findById(anyLong())).thenReturn(userOptional);
         User receivedUser = userService.findByID(1L);
         assertEquals(1L, receivedUser.getId());
@@ -83,8 +84,8 @@ class UserServiceImplTests {
     @Test
     void save() {
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
-        when(userRepository.save(any())).thenReturn(user);
-        User savedUser = userService.save(user);
+        when(userRepository.save(any())).thenReturn(USER);
+        User savedUser = userService.save(USER);
         assertEquals(1L, savedUser.getId());
         assertEquals("Dan", savedUser.getName());
         verify(userRepository).findUserByEmail(anyString());
@@ -93,8 +94,8 @@ class UserServiceImplTests {
 
     @Test
     void update() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        User updatedUser = userService.update(user);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(USER));
+        User updatedUser = userService.update(USER);
         assertEquals(1L, updatedUser.getId());
         assertEquals("Dan", updatedUser.getName());
         verify(userRepository).findById(anyLong());
@@ -102,7 +103,7 @@ class UserServiceImplTests {
 
     @Test
     void deleteByID() {
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(USER));
         User deletedUser = userService.deleteByID(1L);
         verify(userRepository).findById(anyLong());
         assertFalse(deletedUser.isEnabled());
@@ -112,7 +113,7 @@ class UserServiceImplTests {
     void findAllWithError() {
         when(userRepository.findAll()).thenReturn(new ArrayList<>());
         NotFoundException exception = assertThrows(NotFoundException.class, userService::findAll);
-        assertEquals("There are no users now.", exception.getMessage());
+        assertEquals(NO_USERS, exception.getMessage());
         verify(userRepository).findAll();
     }
 
@@ -120,8 +121,8 @@ class UserServiceImplTests {
     void findUserByEmailWithError() {
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> userService.findUserByEmail("gogo@ya.ru"));
-        assertEquals("User with email \"gogo@ya.ru\" doesn't exist.", exception.getMessage());
+                () -> userService.findUserByEmail(USER.getEmail()));
+        assertEquals(USER_NOT_FOUND_BY_EMAIL + USER.getEmail(), exception.getMessage());
         verify(userRepository).findUserByEmail(anyString());
     }
 
@@ -129,8 +130,8 @@ class UserServiceImplTests {
     void findByIDWithError() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> userService.findByID(-1L));
-        assertEquals("User with ID = -1 doesn't exist.", exception.getMessage());
+                () -> userService.findByID(NEGATIVE_ID));
+        assertEquals(USER_NOT_FOUND_BY_ID + NEGATIVE_ID, exception.getMessage());
         verify(userRepository).findById(anyLong());
     }
 
@@ -138,8 +139,8 @@ class UserServiceImplTests {
     void saveWithError() {
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(User.builder().build()));
         ExistsException exception = assertThrows(ExistsException.class,
-                () -> userService.save(user));
-        assertEquals("User with email \"" + user.getEmail() + "\" already exists.", exception.getMessage());
+                () -> userService.save(USER));
+        assertEquals(USER_EXISTS_WITH_EMAIL + USER.getEmail(), exception.getMessage());
         verify(userRepository).findUserByEmail(anyString());
     }
 
@@ -147,8 +148,8 @@ class UserServiceImplTests {
     void updateWithError1() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> userService.update(user));
-        assertEquals("User with ID = 1 doesn't exist.", exception.getMessage());
+                () -> userService.update(USER));
+        assertEquals(USER_NOT_FOUND_BY_ID + USER.getId(), exception.getMessage());
         verify(userRepository).findById(anyLong());
     }
 
@@ -157,8 +158,8 @@ class UserServiceImplTests {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(User.builder().email("gogog@ya.ru").build()));
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(User.builder().build()));
         ExistsException exception = assertThrows(ExistsException.class,
-                () -> userService.update(user));
-        assertEquals("User with email \"" + user.getEmail() + "\" already exists.", exception.getMessage());
+                () -> userService.update(USER));
+        assertEquals(USER_EXISTS_WITH_EMAIL + USER.getEmail(), exception.getMessage());
         verify(userRepository).findById(anyLong());
         verify(userRepository).findUserByEmail(anyString());
     }
@@ -167,8 +168,8 @@ class UserServiceImplTests {
     void deleteWithError() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> userService.deleteByID(-1L));
-        assertEquals("User with ID = -1 doesn't exist.", exception.getMessage());
+                () -> userService.deleteByID(NEGATIVE_ID));
+        assertEquals(USER_NOT_FOUND_BY_ID + NEGATIVE_ID, exception.getMessage());
         verify(userRepository).findById(anyLong());
     }
 }
