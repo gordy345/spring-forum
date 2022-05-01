@@ -18,6 +18,7 @@ public class CacheKeys {
 
     public static final String COMMENT_BY_ID = "commentById_";
     public static final String COMMENTS_FOR_POST = "commentsForPost_";
+    public static final String COMMENTS_COUNT_FOR_POST = "commentsCountForPost_";
 
     public static final String TAGS_FOR_POST = "tagsForPost_";
     public static final String TAG_BY_ID = "tagById_";

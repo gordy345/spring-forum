@@ -12,8 +12,7 @@ import javax.transaction.Transactional;
 import java.util.Optional;
 import java.util.Set;
 
-import static spring_forum.utils.CacheKeys.COMMENTS_FOR_POST;
-import static spring_forum.utils.CacheKeys.COMMENT_BY_ID;
+import static spring_forum.utils.CacheKeys.*;
 import static spring_forum.utils.ExceptionMessages.COMMENT_NOT_FOUND_BY_ID;
 import static spring_forum.utils.ExceptionMessages.NO_COMMENTS_FOR_POST;
 
@@ -39,12 +38,20 @@ public class CommentServiceImpl implements CommentService {
         log.info("Finding comments for post with ID = " + postID);
         Post post = postService.findByID(postID);
         Set<Comment> comments = post.getComments();
-        if(comments.size() == 0) {
+        if (comments.size() == 0) {
             String message = NO_COMMENTS_FOR_POST + postID;
             producer.send(message);
             throw new NotFoundException(message);
         }
         return comments;
+    }
+
+    @Override
+    @Transactional
+    public Long countCommentsByPostId(Long postID) {
+        log.info("Counting comments for post with ID = " + postID);
+        postService.findByID(postID);
+        return commentRepository.countCommentsByPostId(postID);
     }
 
     @Override
@@ -64,7 +71,8 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public Comment save(Comment comment) {
         log.info("Saving new comment with text: " + comment.getText());
-        cacheService.remove(COMMENTS_FOR_POST + comment.getPost().getId());
+        cacheService.remove(COMMENTS_FOR_POST + comment.getPost().getId(),
+                COMMENTS_COUNT_FOR_POST + comment.getPost().getId());
         return commentRepository.save(comment);
     }
 
@@ -87,7 +95,8 @@ public class CommentServiceImpl implements CommentService {
         log.info("Deleting comment with ID = " + id);
         Comment comment = findByID(id);
         cacheService.remove(COMMENT_BY_ID + id,
-                COMMENTS_FOR_POST + comment.getPost().getId());
+                COMMENTS_FOR_POST + comment.getPost().getId(),
+                COMMENTS_COUNT_FOR_POST + comment.getPost().getId());
         commentRepository.delete(comment);
         return comment;
     }

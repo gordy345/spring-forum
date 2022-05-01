@@ -155,7 +155,8 @@ public class PostServiceImpl implements PostService {
                 POST_BY_ID + post.getId(),
                 POST_BY_TITLE + post.getTitle(),
                 TAGS_FOR_POST + id,
-                COMMENTS_FOR_POST + id);
+                COMMENTS_FOR_POST + id,
+                COMMENTS_COUNT_FOR_POST + id);
         cacheService.remove(post.getTags()
                 .stream()
                 .map(tag -> POSTS_BY_TAG + tag.getTag())

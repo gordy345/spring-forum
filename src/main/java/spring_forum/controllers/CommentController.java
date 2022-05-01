@@ -16,8 +16,7 @@ import javax.validation.Valid;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static spring_forum.utils.CacheKeys.COMMENTS_FOR_POST;
-import static spring_forum.utils.CacheKeys.COMMENT_BY_ID;
+import static spring_forum.utils.CacheKeys.*;
 
 @RestController
 @RequestMapping("/comments")
@@ -63,6 +62,17 @@ public class CommentController {
         String jsonResult = Utils.convertToJson(commentDTO);
         cacheService.put(cacheKey, jsonResult);
         return jsonResult;
+    }
+
+    @GetMapping("/count/{postId}")
+    public String countCommentsByPostID(@PathVariable Long postId) {
+        String cacheKey = COMMENTS_COUNT_FOR_POST + postId;
+        if (cacheService.containsKey(cacheKey)) {
+            return cacheService.get(cacheKey);
+        }
+        String result = String.valueOf(commentService.countCommentsByPostId(postId));
+        cacheService.put(cacheKey, result);
+        return result;
     }
 
     @PostMapping
