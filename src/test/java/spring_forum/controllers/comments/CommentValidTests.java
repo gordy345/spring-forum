@@ -44,6 +44,14 @@ public class CommentValidTests {
     }
 
     @Test
+    public void countCommentsForPostValidTest() {
+        given()
+                .when().get(DEFAULT_URL + "/count/1").then()
+                .body(equalTo("1"))
+                .statusCode(200);
+    }
+
+    @Test
     public void saveAndDeleteCommentValidTest() {
         CommentDTO comment = CommentDTO.builder().text("New Comment").postID(1L).commentOwnerID(1L).build();
         Integer id = given()

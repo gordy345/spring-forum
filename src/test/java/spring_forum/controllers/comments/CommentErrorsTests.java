@@ -33,6 +33,14 @@ public class CommentErrorsTests {
     }
 
     @Test
+    public void countCommentsForPostWithErrorTest() {
+        given()
+                .when().get(DEFAULT_URL + "/post/-1").then()
+                .body(equalTo(POST_NOT_FOUND_BY_ID + NEGATIVE_ID))
+                .statusCode(400);
+    }
+
+    @Test
     public void saveCommentWithWrongCommentOwnerIDTest() {
         CommentDTO comment = CommentDTO.builder().text("New Comment").postID(1L).commentOwnerID(-1L).build();
         given()

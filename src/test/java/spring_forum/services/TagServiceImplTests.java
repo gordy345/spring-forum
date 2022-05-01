@@ -5,14 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import spring_forum.domain.Post;
 import spring_forum.domain.Tag;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
 import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.TagRepository;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -52,8 +50,8 @@ class TagServiceImplTests {
     void findTagsForPostByID() {
         Set<Tag> tagsForPost = new HashSet<>();
         tagsForPost.add(TAG);
-        Post postToReturn = Post.builder().id(1L).tags(tagsForPost).build();
-        when(postService.findByID(anyLong())).thenReturn(postToReturn);
+        POST.setTags(tagsForPost);
+        when(postService.findByID(anyLong())).thenReturn(POST);
         Set<Tag> tags = tagService.findTagsForPostByID(1L);
         assertEquals(1, tags.size());
         assertEquals(1L, tags.iterator().next().getId());
@@ -65,16 +63,17 @@ class TagServiceImplTests {
         when(tagRepository.findById(anyLong())).thenReturn(Optional.of(TAG));
         Tag receivedTag = tagService.findByID(1L);
         assertEquals(1L, receivedTag.getId());
-        assertEquals("Test", receivedTag.getTag());
+        assertEquals(TAG.getTag(), receivedTag.getTag());
         verify(tagRepository).findById(anyLong());
     }
 
     @Test
     void save() {
         when(tagRepository.save(any())).thenReturn(TAG);
+        POST.getTags().clear();
         Tag savedTag = tagService.save(TAG);
         assertEquals(1L, savedTag.getId());
-        assertEquals("Test", savedTag.getTag());
+        assertEquals(TAG.getTag(), savedTag.getTag());
         verify(tagRepository).save(any(Tag.class));
     }
 
@@ -82,11 +81,23 @@ class TagServiceImplTests {
     void update() {
         when(tagRepository.findById(anyLong())).thenReturn(
                 Optional.of(Tag.builder().id(1L).posts(TAG.getPosts()).build()));
+        POST.getTags().clear();
         Tag updatedTag = tagService.update(TAG);
         assertEquals(1L, updatedTag.getId());
-        assertEquals("Test", updatedTag.getTag());
+        assertEquals(TAG.getTag(), updatedTag.getTag());
         assertEquals(1L, updatedTag.getPosts().iterator().next().getId());
         verify(tagRepository).findById(anyLong());
+    }
+
+    @Test
+    void deleteTagForPost() {
+        POST.getTags().add(TAG);
+        when(tagRepository.findById(anyLong())).thenReturn(Optional.of(TAG));
+        when(postService.findByID(anyLong())).thenReturn(POST);
+        tagService.deleteTagForPost(TAG.getId(), POST.getId());
+        assertEquals(0, POST.getTags().size());
+        verify(tagRepository).findById(anyLong());
+        verify(tagRepository).deleteById(anyLong());
     }
 
     @Test
@@ -108,7 +119,7 @@ class TagServiceImplTests {
 
     @Test
     void findTagsForPostWithError2() {
-        when(postService.findByID(anyLong())).thenReturn(Post.builder().build());
+        when(postService.findByID(anyLong())).thenReturn(POST_EMPTY);
         NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> tagService.findTagsForPostByID(POST.getId()));
         assertEquals(NO_TAGS_FOR_POST + POST.getId(), exception.getMessage());
@@ -126,12 +137,10 @@ class TagServiceImplTests {
 
     @Test
     void saveWithError() {
-        Set<Tag> tagsForPost = Set.of(Tag.builder().tag("tag").build());
-        Post relatedPost = Post.builder().id(1L).tags(tagsForPost).build();
-        Tag tagToSave = Tag.builder().tag("tag").posts(Collections.singleton(relatedPost)).build();
+        POST.getTags().add(TAG);
         ExistsException exception = assertThrows(ExistsException.class,
-                () -> tagService.save(tagToSave));
-        assertEquals(TAG_EXISTS_FOR_POST + relatedPost.getId(), exception.getMessage());
+                () -> tagService.save(TAG));
+        assertEquals(TAG_EXISTS_FOR_POST + POST.getId(), exception.getMessage());
     }
 
     @Test
@@ -145,14 +154,20 @@ class TagServiceImplTests {
 
     @Test
     void updateWithError2() {
-        Set<Tag> tagsForPost = Set.of(Tag.builder().tag("tag").build());
-        Post relatedPost = Post.builder().id(1L).tags(tagsForPost).build();
-        when(tagRepository.findById(anyLong())).thenReturn
-                (Optional.of(Tag.builder().posts(Collections.singleton(relatedPost)).build()));
-        Tag tagToUpdate = Tag.builder().id(1L).tag("tag").posts(Collections.singleton(relatedPost)).build();
+        when(tagRepository.findById(anyLong())).thenReturn(Optional.of(TAG_EMPTY));
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> tagService.update(TAG));
+        assertEquals(POST_DOESNT_CONTAIN_TAG + POST.getId(), exception.getMessage());
+        verify(tagRepository).findById(anyLong());
+    }
+
+    @Test
+    void updateWithError3() {
+        POST.getTags().add(TAG);
+        when(tagRepository.findById(anyLong())).thenReturn(Optional.of(TAG));
         ExistsException exception = assertThrows(ExistsException.class,
-                () -> tagService.update(tagToUpdate));
-        assertEquals(TAG_EXISTS_FOR_POST + relatedPost.getId(), exception.getMessage());
+                () -> tagService.update(TAG));
+        assertEquals(TAG_EXISTS_FOR_POST + POST.getId(), exception.getMessage());
         verify(tagRepository).findById(anyLong());
     }
 

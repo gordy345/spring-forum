@@ -6,8 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import spring_forum.domain.Comment;
-import spring_forum.domain.Post;
-import spring_forum.domain.User;
 import spring_forum.exceptions.NotFoundException;
 import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.CommentRepository;
@@ -51,8 +49,8 @@ class CommentServiceImplTests {
     void findCommentsForPostByID() {
         Set<Comment> commentsForPost = new HashSet<>();
         commentsForPost.add(COMMENT);
-        Post postToReturn = Post.builder().id(1L).comments(commentsForPost).build();
-        when(postService.findByID(anyLong())).thenReturn(postToReturn);
+        POST.setComments(commentsForPost);
+        when(postService.findByID(anyLong())).thenReturn(POST);
         Set<Comment> comments = commentService.findCommentsForPostByID(1L);
         assertEquals(1, comments.size());
         assertEquals(1L, comments.iterator().next().getId());
@@ -60,11 +58,20 @@ class CommentServiceImplTests {
     }
 
     @Test
+    void countCommentsByPostId() {
+        when(commentRepository.countCommentsByPostId(anyLong())).thenReturn(1L);
+        Long resultCount = commentService.countCommentsByPostId(1L);
+        assertEquals(1L, resultCount);
+        verify(postService).findByID(anyLong());
+        verify(commentRepository).countCommentsByPostId(anyLong());
+    }
+
+    @Test
     void findByID() {
         when(commentRepository.findById(anyLong())).thenReturn(Optional.of(COMMENT));
         Comment receivedComment = commentService.findByID(1L);
         assertEquals(1L, receivedComment.getId());
-        assertEquals("Test", receivedComment.getText());
+        assertEquals(COMMENT.getText(), receivedComment.getText());
         verify(commentRepository).findById(anyLong());
     }
 
@@ -73,19 +80,17 @@ class CommentServiceImplTests {
         when(commentRepository.save(any())).thenReturn(COMMENT);
         Comment savedComment = commentService.save(COMMENT);
         assertEquals(1L, savedComment.getId());
-        assertEquals("Test", savedComment.getText());
+        assertEquals(COMMENT.getText(), savedComment.getText());
         verify(commentRepository).save(any(Comment.class));
     }
 
     @Test
     void update() {
         when(commentRepository.findById(anyLong())).thenReturn(
-                Optional.of(Comment.builder().id(1L).build()));
-        COMMENT.setCommentOwner(User.builder().id(1L).build());
+                Optional.of(COMMENT_EMPTY));
         Comment updatedComment = commentService.update(COMMENT);
-        assertEquals(1L, updatedComment.getId());
-        assertEquals("Test", updatedComment.getText());
-        assertEquals(1L, updatedComment.getCommentOwner().getId());
+        assertEquals(COMMENT.getText(), updatedComment.getText());
+        assertEquals(USER.getId(), updatedComment.getCommentOwner().getId());
         verify(commentRepository).findById(anyLong());
     }
 
@@ -108,7 +113,7 @@ class CommentServiceImplTests {
 
     @Test
     void findCommentsForPostWithError2() {
-        when(postService.findByID(anyLong())).thenReturn(Post.builder().build());
+        when(postService.findByID(anyLong())).thenReturn(POST_EMPTY);
         NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> commentService.findCommentsForPostByID(POST.getId()));
         assertEquals(NO_COMMENTS_FOR_POST + POST.getId(), exception.getMessage());

@@ -85,6 +85,18 @@ public class TagErrorsTests {
     }
 
     @Test
+    public void updateTagWithWrongPostTest() {
+        TagDTO tag = TagDTO.builder().tag("newTag").postID(2L).build();
+        tag.setId(1L);
+        given()
+                .contentType(ContentType.JSON)
+                .body(tag)
+                .when().put(DEFAULT_URL).then()
+                .body(equalTo(POST_DOESNT_CONTAIN_TAG + 2))
+                .statusCode(400);
+    }
+
+    @Test
     public void deleteTagNotExistsTest() {
         given()
                 .when().delete(DEFAULT_URL + "/-1/post/1").then()

@@ -8,16 +8,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import spring_forum.domain.User;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
+import spring_forum.exceptions.TokenExpiredException;
 import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.UserRepository;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static spring_forum.TestConstants.NEGATIVE_ID;
-import static spring_forum.TestConstants.USER;
+import static spring_forum.TestConstants.*;
 import static spring_forum.utils.ExceptionMessages.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,10 +65,10 @@ class UserServiceImplTests {
     void findUserByEmail() {
         Optional<User> userOptional = Optional.of(USER);
         when(userRepository.findUserByEmail(anyString())).thenReturn(userOptional);
-        User receivedUser = userService.findUserByEmail("gogo@ya.ru");
+        User receivedUser = userService.findUserByEmail(USER.getEmail());
         assertEquals(1L, receivedUser.getId());
-        assertEquals("Dan", receivedUser.getName());
-        assertEquals("gogo@ya.ru", receivedUser.getEmail());
+        assertEquals(USER.getName(), receivedUser.getName());
+        assertEquals(USER.getEmail(), receivedUser.getEmail());
         verify(userRepository).findUserByEmail(anyString());
     }
 
@@ -77,8 +78,52 @@ class UserServiceImplTests {
         when(userRepository.findById(anyLong())).thenReturn(userOptional);
         User receivedUser = userService.findByID(1L);
         assertEquals(1L, receivedUser.getId());
-        assertEquals("Dan", receivedUser.getName());
+        assertEquals(USER.getName(), receivedUser.getName());
         verify(userRepository).findById(anyLong());
+    }
+
+    @Test
+    void uploadAvatar() {
+        Optional<User> userOptional = Optional.of(USER);
+        when(userRepository.findById(anyLong())).thenReturn(userOptional);
+        String url = userService.uploadAvatar(USER.getId());
+        assertEquals(url, USER.getImageUrl());
+        verify(userRepository).findById(anyLong());
+    }
+
+    @Test
+    void uploadAvatar2() {
+        Optional<User> userOptional = Optional.of(USER_EMPTY);
+        when(userRepository.findById(anyLong())).thenReturn(userOptional);
+        String url = userService.uploadAvatar(USER.getId());
+        assertNotNull(url);
+        verify(userRepository).findById(anyLong());
+    }
+
+    @Test
+    void enableUserByToken() {
+        when(verificationTokenService.findTokenByValue(anyString())).thenReturn(VERIFICATION_TOKEN);
+        USER.setEnabled(false);
+        userService.enableUser(PLUG);
+        assertTrue(USER.isEnabled());
+    }
+
+    @Test
+    void enableUserByID() {
+        Optional<User> userOptional = Optional.of(USER);
+        when(userRepository.findById(anyLong())).thenReturn(userOptional);
+        USER.setEnabled(false);
+        userService.enableUser(USER.getId());
+        assertTrue(USER.isEnabled());
+    }
+
+    @Test
+    void disableUserByID() {
+        Optional<User> userOptional = Optional.of(USER);
+        when(userRepository.findById(anyLong())).thenReturn(userOptional);
+        userService.disableUser(USER.getId());
+        assertFalse(USER.isEnabled());
+        USER.setEnabled(true);
     }
 
     @Test
@@ -86,8 +131,8 @@ class UserServiceImplTests {
         when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.empty());
         when(userRepository.save(any())).thenReturn(USER);
         User savedUser = userService.save(USER);
-        assertEquals(1L, savedUser.getId());
-        assertEquals("Dan", savedUser.getName());
+        assertEquals(USER.getId(), savedUser.getId());
+        assertEquals(USER.getName(), savedUser.getName());
         verify(userRepository).findUserByEmail(anyString());
         verify(userRepository).save(any(User.class));
     }
@@ -107,6 +152,7 @@ class UserServiceImplTests {
         User deletedUser = userService.deleteByID(1L);
         verify(userRepository).findById(anyLong());
         assertFalse(deletedUser.isEnabled());
+        USER.setEnabled(true);
     }
 
     @Test
@@ -136,8 +182,22 @@ class UserServiceImplTests {
     }
 
     @Test
+    void enableUserByTokenWithError() {
+        when(verificationTokenService.findTokenByValue(anyString())).thenReturn(VERIFICATION_TOKEN);
+        USER.setEnabled(false);
+        Date previousExpiryDate = VERIFICATION_TOKEN.getExpiryDate();
+        VERIFICATION_TOKEN.setExpiryDate(java.sql.Date.valueOf(LocalDate.parse("2018-05-05")));
+        TokenExpiredException exception = assertThrows(TokenExpiredException.class,
+                () -> userService.enableUser(PLUG));
+        assertFalse(USER.isEnabled());
+        assertEquals(TOKEN_EXPIRED, exception.getMessage());
+        VERIFICATION_TOKEN.setExpiryDate(previousExpiryDate);
+        USER.setEnabled(true);
+    }
+
+    @Test
     void saveWithError() {
-        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(User.builder().build()));
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(USER_EMPTY));
         ExistsException exception = assertThrows(ExistsException.class,
                 () -> userService.save(USER));
         assertEquals(USER_EXISTS_WITH_EMAIL + USER.getEmail(), exception.getMessage());
@@ -156,7 +216,7 @@ class UserServiceImplTests {
     @Test
     void updateWithError2() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(User.builder().email("gogog@ya.ru").build()));
-        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(User.builder().build()));
+        when(userRepository.findUserByEmail(anyString())).thenReturn(Optional.of(USER_EMPTY));
         ExistsException exception = assertThrows(ExistsException.class,
                 () -> userService.update(USER));
         assertEquals(USER_EXISTS_WITH_EMAIL + USER.getEmail(), exception.getMessage());

@@ -98,4 +98,20 @@ public class UserValidTests {
                 .body("email", equalTo("gogo@ya.ru"))
                 .statusCode(200);
     }
+
+    @Test
+    public void upVoteRatingForUserValidTest() {
+        given()
+                .when().get(DEFAULT_URL + "/rating/up/1").then()
+                .body("rating", equalTo(1))
+                .statusCode(200);
+    }
+
+    @Test
+    public void downVoteRatingForUserValidTest() {
+        given()
+                .when().get(DEFAULT_URL + "/rating/down/1").then()
+                .body("rating", equalTo(-1))
+                .statusCode(200);
+    }
 }

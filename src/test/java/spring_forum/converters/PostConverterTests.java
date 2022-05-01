@@ -2,44 +2,41 @@ package spring_forum.converters;
 
 import org.junit.jupiter.api.Test;
 import spring_forum.domain.Post;
-import spring_forum.domain.User;
 import spring_forum.dtos.PostDTO;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static spring_forum.TestConstants.POST;
+import static spring_forum.TestConstants.POST_DTO;
 
 public class PostConverterTests {
 
     private final PostConverter postConverter = new PostConverter();
-    private final Post post = Post.builder().id(1L).title("title").text("text")
-            .postOwner(User.builder().id(1L).build()).build();
-    private final PostDTO postDTO = PostDTO.builder().id(1L).title("title").text("text").build();
-
 
     @Test
-    public void testNullObjectToDTO() throws Exception {
+    public void testNullObjectToDTO() {
         assertNull(postConverter.convertToPostDTO(null));
     }
 
     @Test
-    public void testNullObjectFromDTO() throws Exception {
+    public void testNullObjectFromDTO() {
         assertNull(postConverter.convertToPost(null));
     }
 
     @Test
-    public void testEmptyObjectFromDTO() throws Exception {
+    public void testEmptyObjectFromDTO() {
         assertNotNull(postConverter.convertToPost(new PostDTO()));
     }
 
     @Test
-    public void convertToDTO() throws Exception {
-        PostDTO postDTOConverted = postConverter.convertToPostDTO(post);
-        assertEquals(postDTOConverted, postDTO);
+    public void convertToDTO() {
+        PostDTO postDTOConverted = postConverter.convertToPostDTO(POST);
+        assertEquals(postDTOConverted, POST_DTO);
     }
 
     @Test
-    public void convertFromDTO() throws Exception {
-        Post postConverted = postConverter.convertToPost(postDTO);
-        assertEquals(postConverted, post);
+    public void convertFromDTO() {
+        Post postConverted = postConverter.convertToPost(POST_DTO);
+        assertEquals(postConverted, POST);
     }
 
 }

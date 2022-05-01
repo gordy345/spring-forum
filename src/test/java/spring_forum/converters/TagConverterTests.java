@@ -1,48 +1,42 @@
 package spring_forum.converters;
 
 import org.junit.jupiter.api.Test;
-import spring_forum.domain.Post;
 import spring_forum.domain.Tag;
 import spring_forum.dtos.TagDTO;
 
-import java.util.Collections;
-
 import static org.junit.jupiter.api.Assertions.*;
+import static spring_forum.TestConstants.TAG;
+import static spring_forum.TestConstants.TAG_DTO;
 
 public class TagConverterTests {
 
     private final TagConverter tagConverter = new TagConverter();
-    private final Tag tag = Tag.builder().id(1L).tag("Tag")
-            .posts(Collections.singleton(Post.builder().id(1L).build()))
-            .build();
-    private final TagDTO tagDTO = TagDTO.builder().id(1L).tag("Tag").build();
-
 
     @Test
-    public void testNullObjectToDTO() throws Exception {
+    public void testNullObjectToDTO() {
         assertNull(tagConverter.convertToTagDTO(null));
     }
 
     @Test
-    public void testNullObjectFromDTO() throws Exception {
+    public void testNullObjectFromDTO() {
         assertNull(tagConverter.convertToTag(null));
     }
 
     @Test
-    public void testEmptyObjectFromDTO() throws Exception {
+    public void testEmptyObjectFromDTO() {
         assertNotNull(tagConverter.convertToTag(new TagDTO()));
     }
 
     @Test
-    public void convertToDTO() throws Exception {
-        TagDTO tagDTOConverted = tagConverter.convertToTagDTO(tag);
-        assertEquals(tagDTOConverted, tagDTO);
+    public void convertToDTO() {
+        TagDTO tagDTOConverted = tagConverter.convertToTagDTO(TAG);
+        assertEquals(tagDTOConverted, TAG_DTO);
     }
 
     @Test
-    public void convertFromDTO() throws Exception {
-        Tag tagConverted = tagConverter.convertToTag(tagDTO);
-        assertEquals(tagConverted, tag);
+    public void convertFromDTO() {
+        Tag tagConverted = tagConverter.convertToTag(TAG_DTO);
+        assertEquals(tagConverted, TAG);
     }
 
 }

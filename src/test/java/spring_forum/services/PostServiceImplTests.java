@@ -6,8 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import spring_forum.domain.Post;
-import spring_forum.domain.Tag;
-import spring_forum.domain.User;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
 import spring_forum.rabbitMQ.Producer;
@@ -68,8 +66,8 @@ class PostServiceImplTests {
     void findPostsForUserByID() {
         Set<Post> postsForUser = new HashSet<>();
         postsForUser.add(POST);
-        User userToReturn = User.builder().id(1L).posts(postsForUser).build();
-        when(userService.findByID(anyLong())).thenReturn(userToReturn);
+        USER.setPosts(postsForUser);
+        when(userService.findByID(anyLong())).thenReturn(USER);
         Set<Post> posts = postService.findPostsForUserByID(1L);
         assertEquals(1, posts.size());
         assertEquals(1L, posts.iterator().next().getId());
@@ -78,12 +76,8 @@ class PostServiceImplTests {
 
     @Test
     void findPostsByTag() {
-        Set<Post> postsToReturn = new HashSet<>();
-        postsToReturn.add(POST);
-        Tag tag = Tag.builder().id(1L).tag("test").build();
-        tag.setPosts(postsToReturn);
-        when(tagRepository.findTagByTag(anyString())).thenReturn(tag);
-        Set<Post> postsByTag = postService.findPostsByTag("test");
+        when(tagRepository.findTagByTag(anyString())).thenReturn(TAG);
+        Set<Post> postsByTag = postService.findPostsByTag(TAG.getTag());
         assertEquals(1, postsByTag.size());
         assertEquals(1L, postsByTag.iterator().next().getId());
         verify(tagRepository).findTagByTag(anyString());
@@ -92,10 +86,10 @@ class PostServiceImplTests {
     @Test
     void findPostByTitle() {
         when(postRepository.findPostByTitle(anyString())).thenReturn(Optional.of(POST));
-        Post postByTitle = postService.findPostByTitle("Test");
+        Post postByTitle = postService.findPostByTitle(PLUG);
         assertEquals(1L, postByTitle.getId());
-        assertEquals("Test", postByTitle.getTitle());
-        assertEquals("Test", postByTitle.getText());
+        assertEquals(POST.getTitle(), postByTitle.getTitle());
+        assertEquals(POST.getText(), postByTitle.getText());
         verify(postRepository).findPostByTitle(anyString());
     }
 
@@ -104,8 +98,8 @@ class PostServiceImplTests {
         when(postRepository.findById(anyLong())).thenReturn(Optional.of(POST));
         Post receivedPost = postService.findByID(1L);
         assertEquals(1L, receivedPost.getId());
-        assertEquals("Test", receivedPost.getTitle());
-        assertEquals("Test", receivedPost.getText());
+        assertEquals(POST.getTitle(), receivedPost.getTitle());
+        assertEquals(POST.getText(), receivedPost.getText());
         verify(postRepository).findById(anyLong());
     }
 
@@ -115,8 +109,8 @@ class PostServiceImplTests {
         when(postRepository.save(any())).thenReturn(POST);
         Post savedPost = postService.save(POST);
         assertEquals(1L, savedPost.getId());
-        assertEquals("Test", savedPost.getTitle());
-        assertEquals("Test", savedPost.getText());
+        assertEquals(POST.getTitle(), savedPost.getTitle());
+        assertEquals(POST.getText(), savedPost.getText());
         verify(postRepository).findPostByTitle(anyString());
         verify(postRepository).save(any(Post.class));
     }
@@ -128,8 +122,8 @@ class PostServiceImplTests {
                         .title("Test").postOwner(POST.getPostOwner()).build()));
         Post updatedPost = postService.update(POST);
         assertEquals(1L, updatedPost.getId());
-        assertEquals("Test", updatedPost.getTitle());
-        assertEquals("Test", updatedPost.getText());
+        assertEquals(POST.getTitle(), updatedPost.getTitle());
+        assertEquals(POST.getText(), updatedPost.getText());
         verify(postRepository).findById(anyLong());
     }
 
@@ -161,16 +155,17 @@ class PostServiceImplTests {
 
     @Test
     void findPostsForUserByIDWithError2() {
-        when(userService.findByID(anyLong())).thenReturn(User.builder().posts(new HashSet<>()).build());
+        USER.getPosts().clear();
+        when(userService.findByID(anyLong())).thenReturn(USER);
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> postService.findPostsForUserByID(NEGATIVE_ID));
-        assertEquals(NO_POSTS_FOR_USER + NEGATIVE_ID, exception.getMessage());
+                () -> postService.findPostsForUserByID(USER.getId()));
+        assertEquals(NO_POSTS_FOR_USER + USER.getId(), exception.getMessage());
         verify(userService).findByID(anyLong());
     }
 
     @Test
     void findPostsByTagWithError1() {
-        when(tagRepository.findTagByTag(anyString())).thenReturn(Tag.builder().build());
+        when(tagRepository.findTagByTag(anyString())).thenReturn(TAG_EMPTY);
         NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> postService.findPostsByTag(PLUG));
         assertEquals(NO_POSTS_WITH_TAG + PLUG, exception.getMessage());
@@ -206,7 +201,7 @@ class PostServiceImplTests {
 
     @Test
     void saveWithError() {
-        when(postRepository.findPostByTitle(anyString())).thenReturn(Optional.of(Post.builder().build()));
+        when(postRepository.findPostByTitle(anyString())).thenReturn(Optional.of(POST_EMPTY));
         ExistsException exception = assertThrows(ExistsException.class,
                 () -> postService.save(POST));
         assertEquals(POST_EXISTS_WITH_TITLE + POST.getTitle(), exception.getMessage());
@@ -225,7 +220,7 @@ class PostServiceImplTests {
     @Test
     void updateWithError2() {
         when(postRepository.findById(anyLong())).thenReturn(Optional.of(Post.builder().title("title").build()));
-        when(postRepository.findPostByTitle(anyString())).thenReturn(Optional.of(Post.builder().build()));
+        when(postRepository.findPostByTitle(anyString())).thenReturn(Optional.of(POST_EMPTY));
         ExistsException exception = assertThrows(ExistsException.class,
                 () -> postService.update(POST));
         assertEquals(POST_EXISTS_WITH_TITLE + POST.getTitle(), exception.getMessage());

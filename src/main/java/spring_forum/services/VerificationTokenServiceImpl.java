@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.User;
 import spring_forum.domain.VerificationToken;
-import spring_forum.exceptions.NotFoundException;
+import spring_forum.exceptions.TokenExpiredException;
 import spring_forum.repositories.VerificationTokenRepository;
 
 import javax.transaction.Transactional;
@@ -39,7 +39,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
         VerificationToken token =
                 verificationTokenRepository.findVerificationTokenByValue(tokenVal);
         if (token == null) {
-            throw new NotFoundException(TOKEN_EXPIRED);
+            throw new TokenExpiredException(TOKEN_EXPIRED);
         }
         return token;
     }

@@ -1,48 +1,56 @@
 package spring_forum.converters;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import spring_forum.domain.Gender;
 import spring_forum.domain.User;
 import spring_forum.dtos.UserDTO;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static spring_forum.TestConstants.*;
 
+@ExtendWith(MockitoExtension.class)
 public class UserConverterTests {
 
     private final UserConverter userConverter = new UserConverter(new BCryptPasswordEncoder());
-    private final User user = User.builder().id(1L).name("Dan").email("Dan@ya.ru")
-            .isModerator(true).gender(Gender.M).phoneNumber("+7")
-            .country("country").language("language").build();
-    private final UserDTO userDTO = UserDTO.builder().id(1L).name("Dan").email("Dan@ya.ru")
-            .isModerator(true).gender(Gender.M).phoneNumber("+7")
-            .country("country").language("language").build();
 
     @Test
-    public void testNullObjectToDTO() throws Exception {
+    public void testNullObjectToDTO() {
         assertNull(userConverter.convertToUserDTO(null));
     }
 
     @Test
-    public void testEmptyObjectToDTO() throws Exception {
+    public void testEmptyObjectToDTO() {
         assertNotNull(userConverter.convertToUserDTO(new User()));
     }
 
     @Test
-    public void testEmptyObjectFromDTO() throws Exception {
+    public void testEmptyObjectFromDTO() {
         assertNotNull(userConverter.convertToUser(new UserDTO()));
     }
 
     @Test
-    public void convertToDTO() throws Exception {
-        UserDTO userDTOConverted = userConverter.convertToUserDTO(user);
-        assertEquals(userDTOConverted, userDTO);
+    public void convertToDTO() {
+        UserDTO userDTOConverted = userConverter.convertToUserDTO(USER);
+        assertEquals(userDTOConverted, USER_DTO);
     }
 
     @Test
-    public void convertFromDTO() throws Exception {
-        User userConverted = userConverter.convertToUser(userDTO);
-        assertEquals(userConverted, user);
+    public void convertFromUserDTO() {
+//        USER.setEnabled(true);
+        User userConverted = userConverter.convertToUser(USER_DTO);
+        userConverted.setImageUrl(USER.getImageUrl());
+        assertEquals(userConverted, USER);
+    }
+
+    @Test
+    public void convertFromRegisterDTO() {
+//        USER.setEnabled(true);
+        User userConverted = userConverter.convertToUser(REGISTER_DTO);
+        userConverted.setEnabled(true);
+        userConverted.setImageUrl(USER.getImageUrl());
+        assertEquals(userConverted, USER);
     }
 
 }

@@ -2,47 +2,41 @@ package spring_forum.converters;
 
 import org.junit.jupiter.api.Test;
 import spring_forum.domain.Comment;
-import spring_forum.domain.Post;
-import spring_forum.domain.User;
 import spring_forum.dtos.CommentDTO;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static spring_forum.TestConstants.COMMENT;
+import static spring_forum.TestConstants.COMMENT_DTO;
 
 public class CommentConverterTests {
 
     private final CommentConverter commentConverter = new CommentConverter();
-    private final Comment comment = Comment.builder().id(1L).text("Comment")
-            .commentOwner(User.builder().id(1L).build())
-            .post(Post.builder().id(1L).build())
-            .build();
-    private final CommentDTO commentDTO = CommentDTO.builder().id(1L).text("Comment").build();
-
 
     @Test
-    public void testNullObjectToDTO() throws Exception {
+    public void testNullObjectToDTO() {
         assertNull(commentConverter.convertToCommentDTO(null));
     }
 
     @Test
-    public void testNullObjectFromDTO() throws Exception {
+    public void testNullObjectFromDTO() {
         assertNull(commentConverter.convertToComment(null));
     }
 
     @Test
-    public void testEmptyObjectFromDTO() throws Exception {
+    public void testEmptyObjectFromDTO() {
         assertNotNull(commentConverter.convertToComment(new CommentDTO()));
     }
 
     @Test
-    public void convertToDTO() throws Exception {
-        CommentDTO commentDTOConverted = commentConverter.convertToCommentDTO(comment);
-        assertEquals(commentDTOConverted, commentDTO);
+    public void convertToDTO() {
+        CommentDTO commentDTOConverted = commentConverter.convertToCommentDTO(COMMENT);
+        assertEquals(commentDTOConverted, COMMENT_DTO);
     }
 
     @Test
-    public void convertFromDTO() throws Exception {
-        Comment commentConverted = commentConverter.convertToComment(commentDTO);
-        assertEquals(commentConverted, comment);
+    public void convertFromDTO() {
+        Comment commentConverted = commentConverter.convertToComment(COMMENT_DTO);
+        assertEquals(commentConverted, COMMENT);
     }
 
 }

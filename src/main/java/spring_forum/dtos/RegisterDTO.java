@@ -10,6 +10,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -44,7 +45,8 @@ public class RegisterDTO {
     private String language;
 
     @Builder
-    public RegisterDTO(String name, String email, boolean isModerator, Gender gender, String phoneNumber, String password, String confirmPassword) {
+    public RegisterDTO(String name, String email, boolean isModerator, Gender gender, String phoneNumber,
+                       String password, String confirmPassword, String country, String language) {
         this.name = name;
         this.email = email;
         this.isModerator = isModerator;
@@ -52,5 +54,26 @@ public class RegisterDTO {
         this.phoneNumber = phoneNumber;
         this.password = password;
         this.confirmPassword = confirmPassword;
+        this.country = country;
+        this.language = language;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RegisterDTO that = (RegisterDTO) o;
+        return isModerator == that.isModerator &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(email, that.email) &&
+                gender == that.gender &&
+                Objects.equals(phoneNumber, that.phoneNumber) &&
+                Objects.equals(country, that.country) &&
+                Objects.equals(language, that.language);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, email, isModerator, gender, phoneNumber, country, language);
     }
 }

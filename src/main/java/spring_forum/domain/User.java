@@ -87,7 +87,6 @@ public class User extends BaseEntity {
                 Objects.equals(email, user.email) &&
                 gender == user.gender &&
                 Objects.equals(phoneNumber, user.phoneNumber) &&
-                Objects.equals(password, user.password) &&
                 Objects.equals(country, user.country) &&
                 Objects.equals(language, user.language) &&
                 Objects.equals(imageUrl, user.imageUrl);
@@ -95,6 +94,23 @@ public class User extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, email, isModerator, gender, phoneNumber, password, enabled, country, language, imageUrl);
+        return Objects.hash(name, email, isModerator, gender, phoneNumber, enabled, country, language, imageUrl);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", isModerator=" + isModerator +
+                ", gender=" + gender +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", password='" + password + '\'' +
+                ", enabled=" + enabled +
+                ", country='" + country + '\'' +
+                ", language='" + language + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", rating=" + rating +
+                '}';
     }
 }
