@@ -49,13 +49,16 @@ public class User extends BaseEntity {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "rating")
+    private long rating;
+
     @OneToMany(mappedBy = "postOwner")
     private Set<Post> posts = new HashSet<>();
 
     @Builder
     public User(Long id, String name, String email, boolean isModerator,
                 Gender gender, String phoneNumber, String password, boolean enabled,
-                String country, String language, String imageUrl, Set<Post> posts) {
+                String country, String language, String imageUrl, long rating, Set<Post> posts) {
         super(id, 0L);
         this.name = name;
         this.email = email;
@@ -67,6 +70,7 @@ public class User extends BaseEntity {
         this.country = country;
         this.language = language;
         this.imageUrl = imageUrl;
+        this.rating = rating;
         if (posts != null) {
             this.posts = posts;
         }

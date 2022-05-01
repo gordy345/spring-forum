@@ -29,6 +29,7 @@ public class UserConverter {
                 .country(user.getCountry())
                 .language(user.getLanguage())
                 .enabled(user.isEnabled())
+                .rating(user.getRating())
                 .build();
     }
 
@@ -46,6 +47,7 @@ public class UserConverter {
                 .country(userDTO.getCountry())
                 .language(userDTO.getLanguage())
                 .enabled(userDTO.isEnabled())
+                .rating(userDTO.getRating())
                 .build();
     }
 

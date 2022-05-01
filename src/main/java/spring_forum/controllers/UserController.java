@@ -102,6 +102,22 @@ public class UserController {
         return userDTO;
     }
 
+    @GetMapping("/rating/up/{id}")
+    public UserDTO upVoteRatingForUser(@PathVariable Long id) {
+        User user = userService.findByID(id);
+        user.setRating(user.getRating() + 1);
+        userService.update(user);
+        return userConverter.convertToUserDTO(user);
+    }
+
+    @GetMapping("/rating/down/{id}")
+    public UserDTO downVoteRatingForUser(@PathVariable Long id) {
+        User user = userService.findByID(id);
+        user.setRating(user.getRating() - 1);
+        userService.update(user);
+        return userConverter.convertToUserDTO(user);
+    }
+
     @DeleteMapping("/{id}")
     public String deleteUserByID(@PathVariable Long id) {
         User deletedUser = userService.deleteByID(id);
