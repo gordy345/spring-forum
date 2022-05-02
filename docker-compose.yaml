@@ -42,5 +42,21 @@ services:
     networks:
       - spring-forum-network
 
+  rabbitmq:
+    image: rabbitmq:3
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=spring
+      - RABBITMQ_DEFAULT_PASS=spring_forum_pass
+    networks:
+      - spring-forum-network
+
+  redis:
+    image: redis:6.2
+    ports:
+      - 6379:6379
+
 networks:
   spring-forum-network:
