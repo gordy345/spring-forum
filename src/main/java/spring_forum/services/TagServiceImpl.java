@@ -16,8 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static spring_forum.utils.CacheKeys.POSTS_BY_TAG;
-import static spring_forum.utils.CacheKeys.TAGS_FOR_POST;
+import static spring_forum.utils.CacheKeys.*;
 import static spring_forum.utils.ExceptionMessages.*;
 
 @Slf4j
@@ -74,7 +73,8 @@ public class TagServiceImpl implements TagService {
         if (tag.getPosts().size() == 1) {
             tagRepository.deleteById(tagId);
         }
-        cacheService.remove(TAGS_FOR_POST + post.getId(), POSTS_BY_TAG + tag.getTag());
+        cacheService.remove(TAGS_FOR_POST + post.getId(), POSTS_BY_TAG + tag.getTag(),
+                TAG_BY_ID + tagId);
         return tag;
     }
 
@@ -82,6 +82,10 @@ public class TagServiceImpl implements TagService {
     @Transactional
     public void deleteAll(List<Tag> tags) {
         log.info("Deleting list of tags. List amount: " + tags.size());
+        cacheService.remove(tags
+                .stream()
+                .map(tag -> TAG_BY_ID + tag.getId())
+                .collect(Collectors.toList()));
         tagRepository.deleteAll(tags);
     }
 
@@ -127,8 +131,8 @@ public class TagServiceImpl implements TagService {
         if (post.getTags().contains(tag)) {
             throw new ExistsException(TAG_EXISTS_FOR_POST + post.getId());
         }
-        cacheService.remove(TAGS_FOR_POST + post.getId(),
-                POSTS_BY_TAG + tag.getTag(), POSTS_BY_TAG + tagByID.getTag());
+        cacheService.remove(TAGS_FOR_POST + post.getId(), POSTS_BY_TAG + tag.getTag(),
+                POSTS_BY_TAG + tagByID.getTag(), TAG_BY_ID + tag.getId());
         tagByID.setTag(tag.getTag());
         return tag;
     }
@@ -143,7 +147,7 @@ public class TagServiceImpl implements TagService {
                 .map(post -> TAGS_FOR_POST + post.getId())
                 .collect(Collectors.toList());
         cacheService.remove(keysList);
-        cacheService.remove(POSTS_BY_TAG + tag.getTag());
+        cacheService.remove(POSTS_BY_TAG + tag.getTag(), TAG_BY_ID + id);
         tagRepository.delete(tag);
         return tag;
     }
