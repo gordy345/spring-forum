@@ -1,6 +1,7 @@
 package spring_forum.services;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.Post;
 import spring_forum.domain.Tag;
@@ -28,11 +29,25 @@ public class TagServiceImpl implements TagService {
     private final CacheService cacheService;
     private final Producer producer;
 
+    @Autowired
     public TagServiceImpl(TagRepository tagRepository, PostService postService, CacheService cacheService, Producer producer) {
         this.tagRepository = tagRepository;
         this.postService = postService;
         this.cacheService = cacheService;
         this.producer = producer;
+    }
+
+    @Override
+    @Transactional
+    public Tag findTagByValue(String tagValue) {
+        log.info("Finding tag with value: " + tagValue);
+        Tag foundTag = tagRepository.findTagByTag(tagValue);
+        if (foundTag == null) {
+            String errorMessage = TAG_NOT_FOUND_BY_VALUE + tagValue;
+            producer.send(errorMessage);
+            throw new NotFoundException(errorMessage);
+        }
+        return foundTag;
     }
 
     @Override
@@ -61,6 +76,13 @@ public class TagServiceImpl implements TagService {
         }
         cacheService.remove(TAGS_FOR_POST + post.getId(), POSTS_BY_TAG + tag.getTag());
         return tag;
+    }
+
+    @Override
+    @Transactional
+    public void deleteAll(List<Tag> tags) {
+        log.info("Deleting list of tags. List amount: " + tags.size());
+        tagRepository.deleteAll(tags);
     }
 
     @Override

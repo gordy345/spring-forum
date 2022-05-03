@@ -10,7 +10,6 @@ import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
 import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.PostRepository;
-import spring_forum.repositories.TagRepository;
 
 import java.util.*;
 
@@ -32,7 +31,7 @@ class PostServiceImplTests {
     private UserService userService;
 
     @Mock
-    private TagRepository tagRepository;
+    private TagService tagService;
 
     @Mock
     private CacheService cacheService;
@@ -44,7 +43,7 @@ class PostServiceImplTests {
 
     @BeforeEach
     void setUp() {
-        postService = new PostServiceImpl(postRepository, userService, tagRepository, cacheService, producer);
+        postService = new PostServiceImpl(postRepository, userService, tagService, cacheService, producer);
     }
 
     @Test
@@ -76,11 +75,11 @@ class PostServiceImplTests {
 
     @Test
     void findPostsByTag() {
-        when(tagRepository.findTagByTag(anyString())).thenReturn(TAG);
+        when(tagService.findTagByValue(anyString())).thenReturn(TAG);
         Set<Post> postsByTag = postService.findPostsByTag(TAG.getTag());
         assertEquals(1, postsByTag.size());
         assertEquals(1L, postsByTag.iterator().next().getId());
-        verify(tagRepository).findTagByTag(anyString());
+        verify(tagService).findTagByValue(anyString());
     }
 
     @Test
@@ -165,20 +164,11 @@ class PostServiceImplTests {
 
     @Test
     void findPostsByTagWithError1() {
-        when(tagRepository.findTagByTag(anyString())).thenReturn(TAG_EMPTY);
+        when(tagService.findTagByValue(anyString())).thenReturn(TAG_EMPTY);
         NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> postService.findPostsByTag(PLUG));
         assertEquals(NO_POSTS_WITH_TAG + PLUG, exception.getMessage());
-        verify(tagRepository).findTagByTag(anyString());
-    }
-
-    @Test
-    void findPostsByTagWithError2() {
-        when(tagRepository.findTagByTag(anyString())).thenReturn(null);
-        NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> postService.findPostsByTag(PLUG));
-        assertEquals(NO_POSTS_WITH_TAG + PLUG, exception.getMessage());
-        verify(tagRepository).findTagByTag(anyString());
+        verify(tagService).findTagByValue(anyString());
     }
 
     @Test

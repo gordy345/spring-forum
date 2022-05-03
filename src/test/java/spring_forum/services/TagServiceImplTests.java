@@ -11,14 +11,14 @@ import spring_forum.exceptions.NotFoundException;
 import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.TagRepository;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static spring_forum.TestConstants.*;
@@ -44,6 +44,15 @@ class TagServiceImplTests {
     @BeforeEach
     void setUp() {
         tagService = new TagServiceImpl(tagRepository, postService, cacheService, producer);
+    }
+
+    @Test
+    void findTagByValue() {
+        when(tagRepository.findTagByTag(anyString())).thenReturn(TAG);
+        Tag foundTag = tagService.findTagByValue(TAG.getTag());
+        assertEquals(foundTag.getTag(), TAG.getTag());
+        assertEquals(foundTag.getId(), TAG.getId());
+        verify(tagRepository).findTagByTag(anyString());
     }
 
     @Test
@@ -106,6 +115,21 @@ class TagServiceImplTests {
         tagService.deleteByID(1L);
         verify(tagRepository).findById(anyLong());
         verify(tagRepository).delete(any(Tag.class));
+    }
+
+    @Test
+    void deleteAll() {
+        tagService.deleteAll(Collections.EMPTY_LIST);
+        verify(tagRepository).deleteAll(any());
+    }
+
+    @Test
+    void findTagByValueWithError() {
+        when(tagRepository.findTagByTag(anyString())).thenReturn(null);
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> tagService.findTagByValue(TAG.getTag()));
+        assertEquals(TAG_NOT_FOUND_BY_VALUE + TAG.getTag(), exception.getMessage());
+        verify(tagRepository).findTagByTag(anyString());
     }
 
     @Test

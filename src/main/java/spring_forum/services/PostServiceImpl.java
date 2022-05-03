@@ -1,6 +1,8 @@
 package spring_forum.services;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.Post;
 import spring_forum.domain.Tag;
@@ -9,7 +11,6 @@ import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
 import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.PostRepository;
-import spring_forum.repositories.TagRepository;
 
 import javax.transaction.Transactional;
 import java.util.LinkedHashSet;
@@ -27,14 +28,15 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final UserService userService;
-    private final TagRepository tagRepository;
+    private final TagService tagService;
     private final CacheService cacheService;
     private final Producer producer;
 
-    public PostServiceImpl(PostRepository postRepository, UserService userService, TagRepository tagRepository, CacheService cacheService, Producer producer) {
+    @Autowired
+    public PostServiceImpl(PostRepository postRepository, UserService userService, @Lazy TagService tagService, CacheService cacheService, Producer producer) {
         this.postRepository = postRepository;
         this.userService = userService;
-        this.tagRepository = tagRepository;
+        this.tagService = tagService;
         this.cacheService = cacheService;
         this.producer = producer;
     }
@@ -70,15 +72,10 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Set<Post> findPostsByTag(String tag) {
         log.info("Finding posts with tag: " + tag);
-        log.info("Finding tag with tag value = " + tag);
-        Tag foundTag = tagRepository.findTagByTag(tag);
-        String errorMessage = NO_POSTS_WITH_TAG + tag;
-        if (foundTag == null) {
-            producer.send(errorMessage);
-            throw new NotFoundException(errorMessage);
-        }
+        Tag foundTag = tagService.findTagByValue(tag);
         Set<Post> posts = foundTag.getPosts();
         if (posts.size() == 0) {
+            String errorMessage = NO_POSTS_WITH_TAG + tag;
             producer.send(errorMessage);
             throw new NotFoundException(errorMessage);
         }
@@ -167,7 +164,7 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
         post.getTags().clear();
         postRepository.delete(post);
-        tagRepository.deleteAll(tagsToDelete);
+        tagService.deleteAll(tagsToDelete);
         return post;
     }
 

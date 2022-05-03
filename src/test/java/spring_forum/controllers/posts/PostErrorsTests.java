@@ -30,7 +30,7 @@ public class PostErrorsTests {
         String tag = "-1n";
         given()
                 .when().get(DEFAULT_URL + "/tag/" + tag).then()
-                .body(equalTo(NO_POSTS_WITH_TAG + tag))
+                .body(equalTo(TAG_NOT_FOUND_BY_VALUE + tag))
                 .statusCode(400);
     }
 

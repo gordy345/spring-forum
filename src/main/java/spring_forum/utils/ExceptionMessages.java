@@ -19,6 +19,7 @@ public class ExceptionMessages {
 
     public static final String NO_TAGS_FOR_POST = "There are no tags for this post. Post ID value: ";
     public static final String TAG_NOT_FOUND_BY_ID = "Tag with this ID doesn't exist. ID value: ";
+    public static final String TAG_NOT_FOUND_BY_VALUE = "Tag with this value doesn't exist. Tag value: ";
     public static final String TAG_EXISTS_FOR_POST = "Tag you're trying to save already exists for post with ID = ";
     public static final String POST_DOESNT_CONTAIN_TAG = "This post doesn't contain this tag. Post ID value: ";
 
