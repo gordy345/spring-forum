@@ -73,7 +73,7 @@ public class UserErrorsTests {
     @Test
     public void upVoteRatingForUserErrorTest() {
         given()
-                .when().get(DEFAULT_URL + "/rating/up/-1").then()
+                .when().get(DEFAULT_URL + "/rating/up/-1/10").then()
                 .body(equalTo(USER_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
@@ -81,7 +81,7 @@ public class UserErrorsTests {
     @Test
     public void downVoteRatingForUserErrorTest() {
         given()
-                .when().get(DEFAULT_URL + "/rating/down/-1").then()
+                .when().get(DEFAULT_URL + "/rating/down/-1/10").then()
                 .body(equalTo(USER_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }

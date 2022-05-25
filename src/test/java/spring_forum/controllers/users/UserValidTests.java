@@ -104,16 +104,16 @@ public class UserValidTests {
     @Test
     public void upVoteRatingForUserValidTest() {
         given()
-                .when().get(DEFAULT_URL + "/rating/up/1").then()
-                .body("rating", equalTo(1))
+                .when().get(DEFAULT_URL + "/rating/up/1/15").then()
+                .body("rating", equalTo(15))
                 .statusCode(200);
     }
 
     @Test
     public void downVoteRatingForUserValidTest() {
         given()
-                .when().get(DEFAULT_URL + "/rating/down/1").then()
-                .body("rating", equalTo(-1))
+                .when().get(DEFAULT_URL + "/rating/down/1/10").then()
+                .body("rating", equalTo(-10))
                 .statusCode(200);
     }
 }

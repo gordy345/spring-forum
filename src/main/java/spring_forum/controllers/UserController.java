@@ -97,18 +97,18 @@ public class UserController {
         return userDTO;
     }
 
-    @GetMapping("/rating/up/{id}")
-    public UserDTO upVoteRatingForUser(@PathVariable Long id) {
+    @GetMapping("/rating/up/{id}/{amount}")
+    public UserDTO upVoteRatingForUser(@PathVariable Long id, @PathVariable Long amount) {
         User user = userService.findByID(id);
-        user.setRating(user.getRating() + 1);
+        user.setRating(user.getRating() + amount);
         userService.update(user);
         return userConverter.convertToUserDTO(user);
     }
 
-    @GetMapping("/rating/down/{id}")
-    public UserDTO downVoteRatingForUser(@PathVariable Long id) {
+    @GetMapping("/rating/down/{id}/{amount}")
+    public UserDTO downVoteRatingForUser(@PathVariable Long id, @PathVariable Long amount) {
         User user = userService.findByID(id);
-        user.setRating(user.getRating() - 1);
+        user.setRating(user.getRating() - amount);
         userService.update(user);
         return userConverter.convertToUserDTO(user);
     }
