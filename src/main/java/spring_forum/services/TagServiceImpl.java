@@ -1,7 +1,7 @@
 package spring_forum.services;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.Post;
 import spring_forum.domain.Tag;
@@ -21,20 +21,13 @@ import static spring_forum.utils.ExceptionMessages.*;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
     private final PostService postService;
     private final CacheService cacheService;
     private final Producer producer;
-
-    @Autowired
-    public TagServiceImpl(TagRepository tagRepository, PostService postService, CacheService cacheService, Producer producer) {
-        this.tagRepository = tagRepository;
-        this.postService = postService;
-        this.cacheService = cacheService;
-        this.producer = producer;
-    }
 
     @Override
     @Transactional

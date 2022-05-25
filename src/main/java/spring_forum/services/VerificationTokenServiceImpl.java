@@ -1,5 +1,6 @@
 package spring_forum.services;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.User;
@@ -14,13 +15,10 @@ import static spring_forum.utils.ExceptionMessages.TOKEN_EXPIRED;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class VerificationTokenServiceImpl implements VerificationTokenService {
 
     private final VerificationTokenRepository verificationTokenRepository;
-
-    public VerificationTokenServiceImpl(VerificationTokenRepository verificationTokenRepository) {
-        this.verificationTokenRepository = verificationTokenRepository;
-    }
 
     @Override
     @Transactional

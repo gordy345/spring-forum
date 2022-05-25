@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import spring_forum.domain.Gender;
+import spring_forum.domain.enums.Gender;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;

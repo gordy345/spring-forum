@@ -1,5 +1,6 @@
 package spring_forum.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,19 +27,13 @@ import static spring_forum.utils.CacheKeys.*;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final ImageService imageService;
     private final CacheService cacheService;
     private final UserConverter userConverter;
-
-    public UserController(UserService userService, ImageService imageService, CacheService cacheService, UserConverter userConverter) {
-        this.userService = userService;
-        this.imageService = imageService;
-        this.cacheService = cacheService;
-        this.userConverter = userConverter;
-    }
 
     @GetMapping
     public String showAllUsers() {

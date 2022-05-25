@@ -1,19 +1,18 @@
 package spring_forum.converters;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import spring_forum.domain.User;
+import spring_forum.domain.enums.NameColor;
 import spring_forum.dtos.RegisterDTO;
 import spring_forum.dtos.UserDTO;
 
 @Component
+@RequiredArgsConstructor
 public class UserConverter {
 
     private final PasswordEncoder passwordEncoder;
-
-    public UserConverter(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public UserDTO convertToUserDTO(User user) {
         if (user == null) {

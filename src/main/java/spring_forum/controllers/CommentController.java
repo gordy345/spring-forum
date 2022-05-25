@@ -1,5 +1,6 @@
 package spring_forum.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import spring_forum.converters.CommentConverter;
 import spring_forum.domain.Comment;
@@ -20,6 +21,7 @@ import static spring_forum.utils.CacheKeys.*;
 
 @RestController
 @RequestMapping("/comments")
+@RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
@@ -27,14 +29,6 @@ public class CommentController {
     private final UserService userService;
     private final PostService postService;
     private final CacheService cacheService;
-
-    public CommentController(CommentService commentService, CommentConverter commentConverter, UserService userService, PostService postService, CacheService cacheService) {
-        this.commentService = commentService;
-        this.commentConverter = commentConverter;
-        this.userService = userService;
-        this.postService = postService;
-        this.cacheService = cacheService;
-    }
 
     @GetMapping("/post/{id}")
     public String showCommentsForPostByID(@PathVariable Long id) {

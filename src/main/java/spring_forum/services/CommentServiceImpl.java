@@ -1,5 +1,6 @@
 package spring_forum.services;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.Comment;
@@ -18,19 +19,13 @@ import static spring_forum.utils.ExceptionMessages.NO_COMMENTS_FOR_POST;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
     private final PostService postService;
     private final CacheService cacheService;
     private final Producer producer;
-
-    public CommentServiceImpl(CommentRepository commentRepository, PostService postService, CacheService cacheService, Producer producer) {
-        this.commentRepository = commentRepository;
-        this.postService = postService;
-        this.cacheService = cacheService;
-        this.producer = producer;
-    }
 
     @Override
     @Transactional

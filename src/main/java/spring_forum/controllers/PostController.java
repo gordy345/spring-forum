@@ -1,5 +1,6 @@
 package spring_forum.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import spring_forum.converters.PostConverter;
 import spring_forum.domain.Post;
@@ -18,19 +19,13 @@ import static spring_forum.utils.CacheKeys.*;
 
 @RestController
 @RequestMapping("/posts")
+@RequiredArgsConstructor
 public class PostController {
 
     private final PostService postService;
     private final PostConverter postConverter;
     private final UserService userService;
     private final CacheService cacheService;
-
-    public PostController(PostService postService, PostConverter postConverter, UserService userService, CacheService cacheService) {
-        this.postService = postService;
-        this.postConverter = postConverter;
-        this.userService = userService;
-        this.cacheService = cacheService;
-    }
 
     @GetMapping
     public String showAllPosts() {

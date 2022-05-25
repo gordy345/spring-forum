@@ -1,5 +1,6 @@
 package spring_forum.services;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import static spring_forum.utils.ExceptionMessages.*;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -29,14 +31,6 @@ public class UserServiceImpl implements UserService {
     private final CacheService cacheService;
     private final VerificationTokenService verificationTokenService;
     private final Producer producer;
-
-    public UserServiceImpl(UserRepository userRepository, EmailService emailService, CacheService cacheService, VerificationTokenService verificationTokenService, Producer producer) {
-        this.userRepository = userRepository;
-        this.emailService = emailService;
-        this.cacheService = cacheService;
-        this.verificationTokenService = verificationTokenService;
-        this.producer = producer;
-    }
 
     @Override
     @Transactional

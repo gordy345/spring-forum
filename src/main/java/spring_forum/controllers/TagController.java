@@ -1,5 +1,6 @@
 package spring_forum.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import spring_forum.converters.TagConverter;
 import spring_forum.domain.Post;
@@ -19,19 +20,13 @@ import static spring_forum.utils.CacheKeys.TAG_BY_ID;
 
 @RestController
 @RequestMapping("/tags")
+@RequiredArgsConstructor
 public class TagController {
 
     private final TagService tagService;
     private final TagConverter tagConverter;
     private final PostService postService;
     private final CacheService cacheService;
-
-    public TagController(TagService tagService, TagConverter tagConverter, PostService postService, CacheService cacheService) {
-        this.tagService = tagService;
-        this.tagConverter = tagConverter;
-        this.postService = postService;
-        this.cacheService = cacheService;
-    }
 
     @GetMapping("/post/{id}")
     public String showTagsForPostByID(@PathVariable Long id) {

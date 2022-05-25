@@ -4,7 +4,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import spring_forum.domain.Gender;
+import spring_forum.domain.enums.Gender;
 import spring_forum.dtos.RegisterDTO;
 import spring_forum.dtos.UserDTO;
 

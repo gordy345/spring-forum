@@ -1,12 +1,18 @@
 package spring_forum.bootstrap;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import spring_forum.domain.*;
+import spring_forum.domain.Comment;
+import spring_forum.domain.Post;
+import spring_forum.domain.Tag;
+import spring_forum.domain.User;
+import spring_forum.domain.enums.Gender;
+import spring_forum.domain.enums.NameColor;
 import spring_forum.repositories.PostRepository;
 import spring_forum.repositories.TagRepository;
 import spring_forum.repositories.UserRepository;
@@ -20,6 +26,7 @@ import java.util.List;
 @Slf4j
 @Profile({"test", "default"})
 @Component
+@RequiredArgsConstructor
 public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
     private final UserRepository userRepository;
@@ -28,15 +35,6 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
     private final VerificationTokenRepository verificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final CacheService cacheService;
-
-    public DataLoader(UserRepository userRepository, PostRepository postRepository, TagRepository tagRepository, VerificationTokenRepository verificationTokenRepository, PasswordEncoder passwordEncoder, CacheService cacheService) {
-        this.userRepository = userRepository;
-        this.postRepository = postRepository;
-        this.tagRepository = tagRepository;
-        this.verificationTokenRepository = verificationTokenRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.cacheService = cacheService;
-    }
 
     @Override
     @Transactional
