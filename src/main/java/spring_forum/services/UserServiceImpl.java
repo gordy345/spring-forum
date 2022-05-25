@@ -84,6 +84,8 @@ public class UserServiceImpl implements UserService {
             throw new TokenExpiredException(TOKEN_EXPIRED);
         }
         user.setEnabled(true);
+        cacheService.remove(ALL_USERS, USER_BY_ID + user.getId(),
+                USER_BY_EMAIL + user.getEmail());
     }
 
     @Override
@@ -92,6 +94,8 @@ public class UserServiceImpl implements UserService {
         log.info("Enabling user with ID = " + id);
         User user = findByID(id);
         user.setEnabled(true);
+        cacheService.remove(ALL_USERS, USER_BY_ID + user.getId(),
+                USER_BY_EMAIL + user.getEmail());
     }
 
     @Override
@@ -100,6 +104,8 @@ public class UserServiceImpl implements UserService {
         log.info("Disabling user with ID = " + id);
         User user = findByID(id);
         user.setEnabled(false);
+        cacheService.remove(ALL_USERS, USER_BY_ID + user.getId(),
+                USER_BY_EMAIL + user.getEmail());
     }
 
     @Override
