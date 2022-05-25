@@ -7,7 +7,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import spring_forum.domain.Gender;
+import spring_forum.domain.enums.Gender;
+import spring_forum.domain.enums.NameColor;
 import spring_forum.dtos.UserDTO;
 
 import static io.restassured.RestAssured.given;
@@ -83,7 +84,7 @@ public class UserValidTests {
     public void updateUserValidTest() {
         UserDTO user = UserDTO.builder().id(1L).name("Danya").email("gogog@ya.ru").isModerator(true)
                 .gender(Gender.M).phoneNumber("+79875643232").country("Russia").language("ru")
-                .build();
+                .nameColor(NameColor.RED).build();
         given()
                 .contentType(ContentType.JSON)
                 .body(user)
@@ -96,6 +97,7 @@ public class UserValidTests {
                 .body(user)
                 .when().put(DEFAULT_URL).then()
                 .body("email", equalTo("gogo@ya.ru"))
+                .body("nameColor", equalTo("RED"))
                 .statusCode(200);
     }
 

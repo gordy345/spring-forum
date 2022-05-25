@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import spring_forum.domain.User;
+import spring_forum.domain.enums.NameColor;
 import spring_forum.dtos.UserDTO;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,7 +39,6 @@ public class UserConverterTests {
 
     @Test
     public void convertFromUserDTO() {
-//        USER.setEnabled(true);
         User userConverted = userConverter.convertToUser(USER_DTO);
         userConverted.setImageUrl(USER.getImageUrl());
         assertEquals(userConverted, USER);
@@ -46,10 +46,11 @@ public class UserConverterTests {
 
     @Test
     public void convertFromRegisterDTO() {
-//        USER.setEnabled(true);
         User userConverted = userConverter.convertToUser(REGISTER_DTO);
         userConverted.setEnabled(true);
         userConverted.setImageUrl(USER.getImageUrl());
+        assertEquals(userConverted.getNameColor(), NameColor.BLACK);
+        userConverted.setNameColor(USER.getNameColor());
         assertEquals(userConverted, USER);
     }
 

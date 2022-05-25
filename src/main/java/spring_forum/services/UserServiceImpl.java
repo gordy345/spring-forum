@@ -152,6 +152,7 @@ public class UserServiceImpl implements UserService {
         userByID.setModerator(user.isModerator());
         userByID.setPhoneNumber(user.getPhoneNumber());
         userByID.setRating(user.getRating());
+        userByID.setNameColor(user.getNameColor());
         if (user.getCountry() != null) {
             userByID.setCountry(user.getCountry());
         }

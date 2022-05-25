@@ -64,6 +64,7 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
         dan.setCountry("Russia");
         dan.setLanguage("ru");
         dan.setEnabled(true);
+        dan.setNameColor(NameColor.BLUE);
 
         User kirill = new User();
         kirill.setEmail("kirill113@gmail.com");
@@ -74,6 +75,7 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
         kirill.setGender(Gender.M);
         kirill.setCountry("Russia");
         kirill.setLanguage("ru");
+        kirill.setNameColor(NameColor.BLACK);
 
         return List.of(dan, kirill);
     }

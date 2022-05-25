@@ -4,7 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import spring_forum.domain.Gender;
+import spring_forum.domain.enums.Gender;
+import spring_forum.domain.enums.NameColor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -42,8 +43,10 @@ public class UserDTO extends BaseDTO {
 
     private long rating;
 
+    private NameColor nameColor;
+
     @Builder
-    public UserDTO(Long id, String name, String email, boolean isModerator, Gender gender,
+    public UserDTO(Long id, String name, String email, boolean isModerator, Gender gender, NameColor nameColor,
                    String phoneNumber, boolean enabled, String country, long rating, String language) {
         super(id);
         this.name = name;
@@ -55,6 +58,7 @@ public class UserDTO extends BaseDTO {
         this.country = country;
         this.rating = rating;
         this.language = language;
+        this.nameColor = nameColor;
     }
 
     @Override

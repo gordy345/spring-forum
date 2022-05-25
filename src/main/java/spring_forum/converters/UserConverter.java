@@ -30,6 +30,7 @@ public class UserConverter {
                 .language(user.getLanguage())
                 .enabled(user.isEnabled())
                 .rating(user.getRating())
+                .nameColor(user.getNameColor())
                 .build();
     }
 
@@ -48,6 +49,7 @@ public class UserConverter {
                 .language(userDTO.getLanguage())
                 .enabled(userDTO.isEnabled())
                 .rating(userDTO.getRating())
+                .nameColor(userDTO.getNameColor())
                 .build();
     }
 
@@ -64,6 +66,7 @@ public class UserConverter {
                 .password(passwordEncoder.encode(registerDTO.getPassword()))
                 .country(registerDTO.getCountry())
                 .language(registerDTO.getLanguage())
+                .nameColor(NameColor.BLACK)
                 .build();
     }
 }

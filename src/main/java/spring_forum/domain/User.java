@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import spring_forum.domain.enums.Gender;
+import spring_forum.domain.enums.NameColor;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -52,11 +54,15 @@ public class User extends BaseEntity {
     @Column(name = "rating")
     private long rating;
 
+    @Column(name = "name_color")
+    @Enumerated(EnumType.STRING)
+    private NameColor nameColor;
+
     @OneToMany(mappedBy = "postOwner")
     private Set<Post> posts = new HashSet<>();
 
     @Builder
-    public User(Long id, String name, String email, boolean isModerator,
+    public User(Long id, String name, String email, boolean isModerator, NameColor nameColor,
                 Gender gender, String phoneNumber, String password, boolean enabled,
                 String country, String language, String imageUrl, long rating, Set<Post> posts) {
         super(id, 0L);
@@ -71,6 +77,7 @@ public class User extends BaseEntity {
         this.language = language;
         this.imageUrl = imageUrl;
         this.rating = rating;
+        this.nameColor = nameColor;
         if (posts != null) {
             this.posts = posts;
         }
@@ -86,6 +93,7 @@ public class User extends BaseEntity {
                 Objects.equals(name, user.name) &&
                 Objects.equals(email, user.email) &&
                 gender == user.gender &&
+                nameColor == user.nameColor &&
                 Objects.equals(phoneNumber, user.phoneNumber) &&
                 Objects.equals(country, user.country) &&
                 Objects.equals(language, user.language) &&
@@ -94,7 +102,7 @@ public class User extends BaseEntity {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, email, isModerator, gender, phoneNumber, enabled, country, language, imageUrl);
+        return Objects.hash(name, email, isModerator, gender, nameColor, phoneNumber, enabled, country, language, imageUrl);
     }
 
     @Override
@@ -111,6 +119,7 @@ public class User extends BaseEntity {
                 ", language='" + language + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
                 ", rating=" + rating +
+                ", nameColor=" + nameColor +
                 '}';
     }
 }

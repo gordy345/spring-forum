@@ -1,6 +1,8 @@
 package spring_forum;
 
 import spring_forum.domain.*;
+import spring_forum.domain.enums.Gender;
+import spring_forum.domain.enums.NameColor;
 import spring_forum.dtos.*;
 
 import java.util.Collections;
@@ -11,14 +13,14 @@ public class TestConstants {
     public static final String PLUG = "Test";
     public static final User USER = User.builder().id(1L).name("Dan").email("gogo@ya.ru")
             .isModerator(true).gender(Gender.M).phoneNumber("+7").country("country").imageUrl("url")
-            .password("password").language("language").enabled(true).rating(0).build();
+            .password("password").language("language").enabled(true).rating(0).nameColor(NameColor.RED).build();
 
     public static final UserDTO USER_DTO = UserDTO.builder()
             .id(USER.getId()).name(USER.getName()).email(USER.getEmail())
             .isModerator(USER.isModerator()).gender(USER.getGender())
             .phoneNumber(USER.getPhoneNumber()).country(USER.getCountry())
             .language(USER.getLanguage()).enabled(USER.isEnabled()).rating(USER.getRating())
-            .build();
+            .nameColor(USER.getNameColor()).build();
 
     public static final User USER_EMPTY = User.builder().build();
 
