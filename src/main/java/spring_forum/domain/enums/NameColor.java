@@ -4,5 +4,7 @@ public enum NameColor {
     RED,
     GREEN,
     BLUE,
-    BLACK
+    BLACK,
+    PINK,
+    GOLD
 }

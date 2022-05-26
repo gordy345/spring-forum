@@ -18,6 +18,7 @@ import static java.util.stream.Collectors.toSet;
 import static spring_forum.utils.CacheKeys.TAGS_FOR_POST;
 import static spring_forum.utils.CacheKeys.TAG_BY_ID;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/tags")
 @RequiredArgsConstructor

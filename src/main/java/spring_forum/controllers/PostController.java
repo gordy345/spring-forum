@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import static spring_forum.utils.CacheKeys.*;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/posts")
 @RequiredArgsConstructor
