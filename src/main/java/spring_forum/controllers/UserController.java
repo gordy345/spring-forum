@@ -130,9 +130,9 @@ public class UserController {
         } else {
             User user = userService.findByID(id);
             if (user.getImageUrl() == null) {
-                avatar = ImageUtils.getDefaultImage();
+                avatar = ImageUtils.getDefaultImage(user.getGender());
             } else {
-                avatar = imageService.getImage(user.getImageUrl());
+                avatar = imageService.getImage(user.getImageUrl(), user.getGender());
             }
             cacheService.putImage(cacheKey, avatar);
         }

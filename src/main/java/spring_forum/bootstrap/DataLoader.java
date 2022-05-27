@@ -70,7 +70,7 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
         kirill.setModerator(false);
         kirill.setName("Kirill");
         kirill.setPhoneNumber("+79875467387");
-        kirill.setGender(Gender.M);
+        kirill.setGender(Gender.F);
         kirill.setCountry("Russia");
         kirill.setLanguage("ru");
         kirill.setNameColor(NameColor.BLACK);

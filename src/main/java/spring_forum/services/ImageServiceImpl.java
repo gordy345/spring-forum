@@ -12,6 +12,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Service;
+import spring_forum.domain.enums.Gender;
 import spring_forum.utils.ImageUtils;
 import spring_forum.utils.Secret;
 
@@ -24,7 +25,7 @@ public class ImageServiceImpl implements ImageService {
     private final CloseableHttpClient httpClient = HttpClients.createDefault();
 
     @Override
-    public byte[] getImage(String url) {
+    public byte[] getImage(String url, Gender gender) {
         log.info("Getting image with url: " + url);
         HttpGet httpGet = new HttpGet(url);
         httpGet.setHeader("Authorization", "Basic " + Secret.getBase64());
@@ -35,7 +36,7 @@ public class ImageServiceImpl implements ImageService {
             return bytes;
         } catch (IOException e) {
             log.warn("Cannot load avatar image from disk, setting default..");
-            return ImageUtils.getDefaultImage();
+            return ImageUtils.getDefaultImage(gender);
         }
     }
 
