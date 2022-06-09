@@ -9,5 +9,4 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     Optional<User> findUserByEmail(String email);
 
-    Long countUsersById(Long id);
 }
