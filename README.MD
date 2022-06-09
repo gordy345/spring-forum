@@ -7,9 +7,12 @@ Junit, Mockito and Rest Assured for testing.
 
 ## Running locally
 ### Fully using docker - compose
-Run this command in terminal in a root project folder:
+Run these commands one by one in terminal in a root project folder:
 
-```docker-compose -f docker-compose-all.yaml up -d```
+```
+./mvnw clean install
+docker-compose -f docker-compose-all.yaml up -d
+```
 
 To stop app run this command in the same folder:
 
@@ -41,4 +44,6 @@ You can explore endpoints on [Docs Page](https://hub.apitree.com/dosipov/spring-
 There's initially a user with login "gogo@ya.ru" and password "dan".
 You can log in with these credentials or register your own user (don't forget about email verification).
 
-Have fun!
+## Important
+You won't be able to run it on your machine because there are sensitive credentials
+ I can't share and without them project won't work properly. 
