@@ -7,12 +7,9 @@ Junit, Mockito and Rest Assured for testing.
 
 ## Running locally
 ### Fully using docker - compose
-Run these commands one by one in terminal in a root project folder:
+Run this command in terminal in a root project folder:
 
-```
-./mvnw clean install
-docker-compose -f docker-compose-all.yaml up -d
-```
+```docker-compose -f docker-compose-all.yaml up -d```
 
 To stop app run this command in the same folder:
 
