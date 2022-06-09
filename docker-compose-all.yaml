@@ -1,0 +1,112 @@
+version: "3.7"
+
+services:
+
+  app:
+    depends_on:
+      - mysql-db
+      - telegraf
+      - kapacitor
+      - influxdb
+      - chronograf
+      - rabbitmq
+      - redis
+    build: .
+    restart: on-failure
+    ports:
+      - 8080:8080
+    environment:
+      SPRING_APPLICATION_JSON: '{
+          "spring.datasource.url"  : "jdbc:mysql://mysql-db:3306/forum_dev",
+          "spring.datasource.username" : "dev_user",
+          "spring.datasource.password" : "dev",
+          "spring.rabbitmq.host" : "rabbitmq",
+          "spring.rabbitmq.port" : "5672",
+          "spring.rabbitmq.username" : "spring",
+          "spring.rabbitmq.password" : "spring_forum_pass",
+          "spring.flyway.enabled" : "false",
+          "management.metrics.export.statsd.enabled" : "true",
+          "management.metrics.export.statsd.flavor" : "telegraf",
+          "management.metrics.export.statsd.port" : "8125",
+          "spring.redis.host" : "redis",
+          "spring.redis.port" : "6379"
+        }'
+    networks:
+      - spring-forum-network
+
+
+  mysql-db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: spring_forum
+      MYSQL_DATABASE: forum_dev
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    networks:
+      - spring-forum-network
+  # Define a Telegraf service
+  telegraf:
+    image: telegraf:1.19
+    volumes:
+      - ./src/main/resources/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    ports:
+      - 8125:8125/udp
+    networks:
+      - spring-forum-network
+    depends_on:
+      - influxdb
+  # Define an InfluxDB service
+  influxdb:
+    image: influxdb:1.7
+    volumes:
+      - ./data/influxdb:/var/lib/influxdb
+    ports:
+      - 8086:8086
+    networks:
+      - spring-forum-network
+  # Define a Chronograf service
+  chronograf:
+    image: chronograf:1.6
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - KAPACITOR_URL=http://kapacitor:9092
+    ports:
+      - 8888:8888
+    networks:
+      - spring-forum-network
+  # Define a Kapacitor service
+  kapacitor:
+    image: kapacitor:1.5
+    environment:
+      KAPACITOR_HOSTNAME: kapacitor
+      KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb:8086
+    ports:
+      - 9092:9092
+    networks:
+      - spring-forum-network
+
+  rabbitmq:
+    image: rabbitmq:3
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=spring
+      - RABBITMQ_DEFAULT_PASS=spring_forum_pass
+    networks:
+      - spring-forum-network
+
+  redis:
+    image: redis:6.2
+    ports:
+      - 6379:6379
+    volumes:
+      - ./data/redis:/data
+    networks:
+      - spring-forum-network
+
+networks:
+  spring-forum-network:
