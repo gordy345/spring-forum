@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import spring_forum.domain.Tag;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
-import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.TagRepository;
 
 import java.util.Collections;
@@ -36,14 +35,11 @@ class TagServiceImplTests {
     @Mock
     private CacheService cacheService;
 
-    @Mock
-    private Producer producer;
-
     private TagService tagService;
 
     @BeforeEach
     void setUp() {
-        tagService = new TagServiceImpl(tagRepository, postService, cacheService, producer);
+        tagService = new TagServiceImpl(tagRepository, postService, cacheService);
     }
 
     @Test

@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import spring_forum.domain.Post;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
-import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.PostRepository;
 
 import java.util.*;
@@ -36,14 +35,11 @@ class PostServiceImplTests {
     @Mock
     private CacheService cacheService;
 
-    @Mock
-    private Producer producer;
-
     private PostService postService;
 
     @BeforeEach
     void setUp() {
-        postService = new PostServiceImpl(postRepository, userService, tagService, cacheService, producer);
+        postService = new PostServiceImpl(postRepository, userService, tagService, cacheService);
     }
 
     @Test

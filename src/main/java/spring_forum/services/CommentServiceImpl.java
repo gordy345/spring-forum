@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import spring_forum.domain.Comment;
 import spring_forum.domain.Post;
 import spring_forum.exceptions.NotFoundException;
-import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.CommentRepository;
 
 import javax.transaction.Transactional;
@@ -25,7 +24,6 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final PostService postService;
     private final CacheService cacheService;
-    private final Producer producer;
 
     @Override
     @Transactional
@@ -34,9 +32,7 @@ public class CommentServiceImpl implements CommentService {
         Post post = postService.findByID(postID);
         Set<Comment> comments = post.getComments();
         if (comments.size() == 0) {
-            String message = NO_COMMENTS_FOR_POST + postID;
-            producer.send(message);
-            throw new NotFoundException(message);
+            throw new NotFoundException(NO_COMMENTS_FOR_POST + postID);
         }
         return comments;
     }
@@ -55,9 +51,7 @@ public class CommentServiceImpl implements CommentService {
         log.info("Finding comment with ID = " + id);
         Optional<Comment> commentOptional = commentRepository.findById(id);
         if (commentOptional.isEmpty()) {
-            String message = COMMENT_NOT_FOUND_BY_ID + id;
-            producer.send(message);
-            throw new NotFoundException(message);
+            throw new NotFoundException(COMMENT_NOT_FOUND_BY_ID + id);
         }
         return commentOptional.get();
     }

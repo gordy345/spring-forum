@@ -7,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import spring_forum.domain.Comment;
 import spring_forum.exceptions.NotFoundException;
-import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.CommentRepository;
 
 import java.util.HashSet;
@@ -35,14 +34,11 @@ class CommentServiceImplTests {
     @Mock
     private CacheService cacheService;
 
-    @Mock
-    private Producer producer;
-
     private CommentService commentService;
 
     @BeforeEach
     void setUp() {
-        commentService = new CommentServiceImpl(commentRepository, postService, cacheService, producer);
+        commentService = new CommentServiceImpl(commentRepository, postService, cacheService);
     }
 
     @Test

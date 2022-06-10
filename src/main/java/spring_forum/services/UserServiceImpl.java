@@ -9,7 +9,6 @@ import spring_forum.domain.VerificationToken;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
 import spring_forum.exceptions.TokenExpiredException;
-import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.UserRepository;
 
 import javax.transaction.Transactional;
@@ -30,7 +29,6 @@ public class UserServiceImpl implements UserService {
     private final EmailService emailService;
     private final CacheService cacheService;
     private final VerificationTokenService verificationTokenService;
-    private final Producer producer;
 
     @Override
     @Transactional
@@ -39,7 +37,6 @@ public class UserServiceImpl implements UserService {
         Set<User> users = new LinkedHashSet<>();
         userRepository.findAll().forEach(users::add);
         if (users.size() == 0) {
-            producer.send(NO_USERS);
             throw new NotFoundException(NO_USERS);
         }
         return users;
@@ -51,9 +48,7 @@ public class UserServiceImpl implements UserService {
         log.info("Finding user by email: " + email);
         Optional<User> userOptional = userRepository.findUserByEmail(email);
         if (userOptional.isEmpty()) {
-            String message = USER_NOT_FOUND_BY_EMAIL + email;
-            producer.send(message);
-            throw new NotFoundException(message);
+            throw new NotFoundException(USER_NOT_FOUND_BY_EMAIL + email);
         }
         return userOptional.get();
     }
@@ -114,9 +109,7 @@ public class UserServiceImpl implements UserService {
         log.info("Finding user with ID = " + id);
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isEmpty()) {
-            String message = USER_NOT_FOUND_BY_ID + id;
-            producer.send(message);
-            throw new NotFoundException(message);
+            throw new NotFoundException(USER_NOT_FOUND_BY_ID + id);
         }
         return userOptional.get();
     }

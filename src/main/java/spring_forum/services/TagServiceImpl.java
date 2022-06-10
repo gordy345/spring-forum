@@ -7,7 +7,6 @@ import spring_forum.domain.Post;
 import spring_forum.domain.Tag;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
-import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.TagRepository;
 
 import javax.transaction.Transactional;
@@ -27,7 +26,6 @@ public class TagServiceImpl implements TagService {
     private final TagRepository tagRepository;
     private final PostService postService;
     private final CacheService cacheService;
-    private final Producer producer;
 
     @Override
     @Transactional
@@ -35,9 +33,7 @@ public class TagServiceImpl implements TagService {
         log.info("Finding tag with value: " + tagValue);
         Tag foundTag = tagRepository.findTagByTag(tagValue);
         if (foundTag == null) {
-            String errorMessage = TAG_NOT_FOUND_BY_VALUE + tagValue;
-            producer.send(errorMessage);
-            throw new NotFoundException(errorMessage);
+            throw new NotFoundException(TAG_NOT_FOUND_BY_VALUE + tagValue);
         }
         return foundTag;
     }
@@ -49,9 +45,7 @@ public class TagServiceImpl implements TagService {
         Post post = postService.findByID(postID);
         Set<Tag> tags = post.getTags();
         if (tags.size() == 0) {
-            String message = NO_TAGS_FOR_POST + postID;
-            producer.send(message);
-            throw new NotFoundException(message);
+            throw new NotFoundException(NO_TAGS_FOR_POST + postID);
         }
         return tags;
     }
@@ -88,9 +82,7 @@ public class TagServiceImpl implements TagService {
         log.info("Finding tag with ID = " + id);
         Optional<Tag> tagOptional = tagRepository.findById(id);
         if (tagOptional.isEmpty()) {
-            String message = TAG_NOT_FOUND_BY_ID + id;
-            producer.send(message);
-            throw new NotFoundException(message);
+            throw new NotFoundException(TAG_NOT_FOUND_BY_ID + id);
         }
         return tagOptional.get();
     }
@@ -117,9 +109,7 @@ public class TagServiceImpl implements TagService {
         Tag tagByID = findByID(tag.getId());
         Post post = tag.getPosts().iterator().next();
         if (!tagByID.getPosts().contains(post)) {
-            String message = POST_DOESNT_CONTAIN_TAG + post.getId();
-            producer.send(message);
-            throw new NotFoundException(message);
+            throw new NotFoundException(POST_DOESNT_CONTAIN_TAG + post.getId());
         }
         if (post.getTags().contains(tag)) {
             throw new ExistsException(TAG_EXISTS_FOR_POST + post.getId());

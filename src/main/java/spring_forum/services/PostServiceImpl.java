@@ -9,7 +9,6 @@ import spring_forum.domain.Tag;
 import spring_forum.domain.User;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
-import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.PostRepository;
 
 import javax.transaction.Transactional;
@@ -30,15 +29,13 @@ public class PostServiceImpl implements PostService {
     private final UserService userService;
     private final TagService tagService;
     private final CacheService cacheService;
-    private final Producer producer;
 
     @Autowired
-    public PostServiceImpl(PostRepository postRepository, UserService userService, @Lazy TagService tagService, CacheService cacheService, Producer producer) {
+    public PostServiceImpl(PostRepository postRepository, UserService userService, @Lazy TagService tagService, CacheService cacheService) {
         this.postRepository = postRepository;
         this.userService = userService;
         this.tagService = tagService;
         this.cacheService = cacheService;
-        this.producer = producer;
     }
 
     @Override
@@ -48,7 +45,6 @@ public class PostServiceImpl implements PostService {
         Set<Post> posts = new LinkedHashSet<>();
         postRepository.findAll().forEach(posts::add);
         if (posts.size() == 0) {
-            producer.send(NO_POSTS);
             throw new NotFoundException(NO_POSTS);
         }
         return posts;
@@ -61,9 +57,7 @@ public class PostServiceImpl implements PostService {
         User user = userService.findByID(userId);
         Set<Post> posts = user.getPosts();
         if (posts.size() == 0) {
-            String message = NO_POSTS_FOR_USER + userId;
-            producer.send(message);
-            throw new NotFoundException(message);
+            throw new NotFoundException(NO_POSTS_FOR_USER + userId);
         }
         return posts;
     }
@@ -75,9 +69,7 @@ public class PostServiceImpl implements PostService {
         Tag foundTag = tagService.findTagByValue(tag);
         Set<Post> posts = foundTag.getPosts();
         if (posts.size() == 0) {
-            String errorMessage = NO_POSTS_WITH_TAG + tag;
-            producer.send(errorMessage);
-            throw new NotFoundException(errorMessage);
+            throw new NotFoundException(NO_POSTS_WITH_TAG + tag);
         }
         return posts;
     }
@@ -88,9 +80,7 @@ public class PostServiceImpl implements PostService {
         log.info("Finding post with title: " + title);
         Optional<Post> postOptional = postRepository.findPostByTitle(title);
         if (postOptional.isEmpty()) {
-            String message = POST_NOT_FOUND_BY_TITLE + title;
-            producer.send(message);
-            throw new NotFoundException(message);
+            throw new NotFoundException(POST_NOT_FOUND_BY_TITLE + title);
         }
         return postOptional.get();
     }
@@ -101,9 +91,7 @@ public class PostServiceImpl implements PostService {
         log.info("Finding post with ID = " + id);
         Optional<Post> postOptional = postRepository.findById(id);
         if (postOptional.isEmpty()) {
-            String message = POST_NOT_FOUND_BY_ID + id;
-            producer.send(message);
-            throw new NotFoundException(message);
+            throw new NotFoundException(POST_NOT_FOUND_BY_ID + id);
         }
         return postOptional.get();
     }

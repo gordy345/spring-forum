@@ -9,7 +9,6 @@ import spring_forum.domain.User;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
 import spring_forum.exceptions.TokenExpiredException;
-import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.UserRepository;
 
 import java.time.LocalDate;
@@ -36,14 +35,11 @@ class UserServiceImplTests {
     @Mock
     private VerificationTokenService verificationTokenService;
 
-    @Mock
-    private Producer producer;
-
     private UserService userService;
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository, emailService, cacheService, verificationTokenService, producer);
+        userService = new UserServiceImpl(userRepository, emailService, cacheService, verificationTokenService);
     }
 
     @Test
