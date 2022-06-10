@@ -2,8 +2,10 @@
 ## Description
 Backend service for Forum Application.
 
-Briefly it uses Spring, Redis for caching, TICK stack for monitoring, RabbitMQ for learning purposes,
-JUnit, Mockito, Rest Assured for testing and some helpful libraries.
+It uses Spring (Boot, Security, Web, Data), Redis for caching, TICK stack for monitoring, RabbitMQ for learning purposes,
+JUnit, Mockito, Rest Assured for testing, helpful libraries for identifying geolocation and language.
+
+Also it stores image files on yandex disk and has email verification. 
 
 You can explore endpoints [here](https://hub.apitree.com/dosipov/spring-forum/).
 
