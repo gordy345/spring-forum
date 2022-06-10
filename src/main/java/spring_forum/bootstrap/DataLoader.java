@@ -114,10 +114,10 @@ public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
 
     private void removeData() {
         log.info("Removing data..");
+        cacheService.deleteAllKeys();
         verificationTokenRepository.deleteAll();
         postRepository.deleteAll();
         tagRepository.deleteAll();
         userRepository.deleteAll();
-        cacheService.deleteAllKeys();
     }
 }
