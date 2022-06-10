@@ -8,11 +8,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import spring_forum.domain.User;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
-import spring_forum.exceptions.TokenExpiredException;
 import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.UserRepository;
 
-import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,19 +29,13 @@ class UserServiceImplTests {
     private CacheService cacheService;
 
     @Mock
-    private EmailService emailService;
-
-    @Mock
-    private VerificationTokenService verificationTokenService;
-
-    @Mock
     private Producer producer;
 
     private UserService userService;
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository, emailService, cacheService, verificationTokenService, producer);
+        userService = new UserServiceImpl(userRepository, cacheService, producer);
     }
 
     @Test
@@ -80,32 +72,6 @@ class UserServiceImplTests {
         assertEquals(1L, receivedUser.getId());
         assertEquals(USER.getName(), receivedUser.getName());
         verify(userRepository).findById(anyLong());
-    }
-
-    @Test
-    void uploadAvatar() {
-        Optional<User> userOptional = Optional.of(USER);
-        when(userRepository.findById(anyLong())).thenReturn(userOptional);
-        String url = userService.uploadAvatar(USER.getId());
-        assertEquals(url, USER.getImageUrl());
-        verify(userRepository).findById(anyLong());
-    }
-
-    @Test
-    void uploadAvatar2() {
-        Optional<User> userOptional = Optional.of(USER_EMPTY);
-        when(userRepository.findById(anyLong())).thenReturn(userOptional);
-        String url = userService.uploadAvatar(USER.getId());
-        assertNotNull(url);
-        verify(userRepository).findById(anyLong());
-    }
-
-    @Test
-    void enableUserByToken() {
-        when(verificationTokenService.findTokenByValue(anyString())).thenReturn(VERIFICATION_TOKEN);
-        USER.setEnabled(false);
-        userService.enableUser(PLUG);
-        assertTrue(USER.isEnabled());
     }
 
     @Test
@@ -179,20 +145,6 @@ class UserServiceImplTests {
                 () -> userService.findByID(NEGATIVE_ID));
         assertEquals(USER_NOT_FOUND_BY_ID + NEGATIVE_ID, exception.getMessage());
         verify(userRepository).findById(anyLong());
-    }
-
-    @Test
-    void enableUserByTokenWithError() {
-        when(verificationTokenService.findTokenByValue(anyString())).thenReturn(VERIFICATION_TOKEN);
-        USER.setEnabled(false);
-        Date previousExpiryDate = VERIFICATION_TOKEN.getExpiryDate();
-        VERIFICATION_TOKEN.setExpiryDate(java.sql.Date.valueOf(LocalDate.parse("2018-05-05")));
-        TokenExpiredException exception = assertThrows(TokenExpiredException.class,
-                () -> userService.enableUser(PLUG));
-        assertFalse(USER.isEnabled());
-        assertEquals(TOKEN_EXPIRED, exception.getMessage());
-        VERIFICATION_TOKEN.setExpiryDate(previousExpiryDate);
-        USER.setEnabled(true);
     }
 
     @Test

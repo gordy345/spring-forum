@@ -2,18 +2,14 @@ package spring_forum.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.User;
-import spring_forum.domain.VerificationToken;
 import spring_forum.exceptions.ExistsException;
 import spring_forum.exceptions.NotFoundException;
-import spring_forum.exceptions.TokenExpiredException;
 import spring_forum.rabbitMQ.Producer;
 import spring_forum.repositories.UserRepository;
 
 import javax.transaction.Transactional;
-import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -27,9 +23,7 @@ import static spring_forum.utils.ExceptionMessages.*;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final EmailService emailService;
     private final CacheService cacheService;
-    private final VerificationTokenService verificationTokenService;
     private final Producer producer;
 
     @Override
@@ -56,36 +50,6 @@ public class UserServiceImpl implements UserService {
             throw new NotFoundException(message);
         }
         return userOptional.get();
-    }
-
-    @Override
-    @Transactional
-    public String uploadAvatar(Long id) {
-        log.info("Uploading avatar for user with ID = " + id);
-        User user = findByID(id);
-        String url = user.getImageUrl();
-        if (url == null) {
-            url = "https://webdav.yandex.ru/avatars/"
-                    + RandomStringUtils.random(10, true, true) + ".jpeg";
-            user.setImageUrl(url);
-        }
-        return url;
-    }
-
-    @Override
-    @Transactional
-    public void enableUser(String token) {
-        VerificationToken foundToken
-                = verificationTokenService.findTokenByValue(token);
-        User user = foundToken.getUser();
-        verificationTokenService.deleteTokenByValue(token);
-        log.info("Enabling user with ID = " + user.getId());
-        if (foundToken.getExpiryDate().before(new Date())) {
-            throw new TokenExpiredException(TOKEN_EXPIRED);
-        }
-        user.setEnabled(true);
-        cacheService.remove(ALL_USERS, USER_BY_ID + user.getId(),
-                USER_BY_EMAIL + user.getEmail());
     }
 
     @Override
@@ -130,8 +94,7 @@ public class UserServiceImpl implements UserService {
         }
         cacheService.remove(ALL_USERS);
         User savedUser = userRepository.save(user);
-        String token = verificationTokenService.createNewTokenForUser(savedUser);
-        emailService.sendConfirmationEmail(user.getEmail(), token);
+        savedUser.setEnabled(true);
         return savedUser;
     }
 

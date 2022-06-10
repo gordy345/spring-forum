@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import spring_forum.domain.enums.Gender;
 import spring_forum.domain.enums.NameColor;
+import spring_forum.dtos.RegisterDTO;
 import spring_forum.dtos.UserDTO;
 
 import static io.restassured.RestAssured.given;
@@ -61,14 +62,14 @@ public class UserValidTests {
                 .statusCode(200);
     }
 
-//    @Test
+    @Test
     public void saveAndDeleteUserValidTest() {
-        UserDTO user = UserDTO.builder().name("Ivan").email("vanya333@ya.ru").isModerator(false)
+        RegisterDTO registerDTO = RegisterDTO.builder().name("Ivan").email("vanya333@ya.ru").isModerator(false)
                 .gender(Gender.M).phoneNumber("+79875463773").country("Russia").language("ru")
-                .build();
+                .password("password123").confirmPassword("password123").build();
         Integer id = given()
                 .contentType(ContentType.JSON)
-                .body(user)
+                .body(registerDTO)
                 .when().post(DEFAULT_URL).then()
                 .statusCode(200)
                 .extract().path("id");

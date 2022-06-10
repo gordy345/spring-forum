@@ -1,9 +1,11 @@
 # Forum - Service
 ## Description
 Backend service for Forum Application.
+
+This is a cut version of an API: there're no image uploading and email verification capabilities.
  
 Briefly it uses Spring, Redis for caching, TICK stack for monitoring, RabbitMQ for learning purposes,
-Junit, Mockito and Rest Assured for testing.
+JUnit, Mockito, Rest Assured for testing and some helpful libraries.
 
 ## Running locally
 ### Fully using docker - compose
@@ -36,11 +38,7 @@ To stop services run this command in the same folder:
 
 ## Using an API
 
-You can explore endpoints on [Docs Page](https://hub.apitree.com/dosipov/spring-forum/). 
+You can explore endpoints [here](https://hub.apitree.com/dosipov/spring-forum-cut/). 
 
 There's initially a user with login "gogo@ya.ru" and password "dan".
-You can log in with these credentials or register your own user (don't forget about email verification).
-
-## Important
-You won't be able to run it on your machine because there are sensitive credentials
- I can't share and without them project won't work properly. 
+You can log in with these credentials or register your own user.
