@@ -1,9 +1,25 @@
 # Forum - Service
 ## Description
 Backend service for Forum Application.
- 
+
 Briefly it uses Spring, Redis for caching, TICK stack for monitoring, RabbitMQ for learning purposes,
-Junit, Mockito and Rest Assured for testing.
+JUnit, Mockito, Rest Assured for testing and some helpful libraries.
+
+You can explore endpoints [here](https://hub.apitree.com/dosipov/spring-forum/).
+
+## Using an API
+There's a deployed version of a service without TICK stack and RabbitMQ (you can find code on "deploy" branch)!
+
+You can try it with this base url: https://spring-forum-service.herokuapp.com
+(e. x. https://spring-forum-service.herokuapp.com/users to get all users)
+
+There's initially a user with login "gogo@ya.ru" and password "dan".
+You can log in with these credentials or register your own user (don't forget about email verification).
+
+If you want to run and use app locally then base url will be http://localhost:8080
+(e. x. http://localhost:8080/users to get all users)
+
+Have fun!
 
 ## Running locally
 ### Fully using docker - compose
@@ -32,12 +48,3 @@ When you want to stop the whole application,
 To stop services run this command in the same folder: 
 
 ```docker-compose -f docker-compose-services.yaml down```
-
-## Using an API
-
-You can explore endpoints on [Docs Page](https://hub.apitree.com/dosipov/spring-forum/). 
-
-There's initially a user with login "gogo@ya.ru" and password "dan".
-You can log in with these credentials or register your own user (don't forget about email verification).
-
-Have fun!
