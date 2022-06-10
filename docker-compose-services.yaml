@@ -12,6 +12,7 @@ services:
       - "3306:3306"
     volumes:
       - ./data/mysql:/var/lib/mysql
+      - ./db_dump.sql:/docker-entrypoint-initdb.d/dump.sql
   # Define a Telegraf service
   telegraf:
     image: telegraf:1.19
@@ -68,8 +69,6 @@ services:
     image: redis:6.2
     ports:
       - 6379:6379
-    volumes:
-      - ./data/redis:/data
 
 networks:
   spring-forum-network:

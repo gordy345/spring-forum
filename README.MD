@@ -31,7 +31,6 @@ Run this command in terminal in a root project folder to run services:
 Then you can run app in your favourite IDE from class SpringForumApplication
 or using maven: 
 ```
-./mvnw clean install
 ./mvnw spring-boot:run
 ```
 

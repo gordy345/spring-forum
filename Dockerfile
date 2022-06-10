@@ -1,4 +1,3 @@
-FROM maven:3.8-jdk-11
-COPY . .
-RUN mvn clean install
-CMD mvn spring-boot:run
+FROM openjdk:11
+COPY target/*.jar app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]
