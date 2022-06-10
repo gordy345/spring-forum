@@ -22,7 +22,7 @@ public class EmailServiceImpl implements EmailService {
         message.setSubject("Complete Registration on our Forum!");
         message.setFrom(Secret.getEmailUsernameSMTP());
         message.setText("To confirm your account, please click here: "
-                + "http://localhost:8080/users/confirm-account?token=" + token);
+                + "https://spring-forum-service.herokuapp.com/users/confirm-account?token=" + token);
         javaMailSender.send(message);
     }
 }
