@@ -13,7 +13,6 @@ import spring_forum.services.CacheService;
 import spring_forum.services.ImageService;
 import spring_forum.services.UserService;
 import spring_forum.utils.GeoUtils;
-import spring_forum.utils.ImageUtils;
 import spring_forum.utils.Utils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -129,11 +128,7 @@ public class UserController {
             avatar = cacheService.getImage(cacheKey);
         } else {
             User user = userService.findByID(id);
-            if (user.getImageUrl() == null) {
-                avatar = ImageUtils.getDefaultImage(user.getGender());
-            } else {
-                avatar = imageService.getImage(user.getImageUrl(), user.getGender());
-            }
+            avatar = imageService.getImage(user.getImageUrl(), user.getGender());
             cacheService.putImage(cacheKey, avatar);
         }
         return ResponseEntity

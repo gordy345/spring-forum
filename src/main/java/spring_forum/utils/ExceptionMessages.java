@@ -6,6 +6,7 @@ public class ExceptionMessages {
     public static final String USER_NOT_FOUND_BY_EMAIL = "User with this email doesn't exist. Email value: ";
     public static final String USER_NOT_FOUND_BY_ID = "User with this ID doesn't exist. ID value: ";
     public static final String USER_EXISTS_WITH_EMAIL = "User with this email already exists. Email value: ";
+    public static final String AVATAR_NOT_FOUND = "Avatar not found.";
 
     public static final String NO_POSTS = "There are no posts now.";
     public static final String NO_POSTS_FOR_USER = "There are no posts for this user. User ID value: ";

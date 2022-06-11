@@ -11,12 +11,15 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import spring_forum.domain.enums.Gender;
-import spring_forum.utils.ImageUtils;
+import spring_forum.exceptions.NotFoundException;
 import spring_forum.utils.Secret;
 
 import java.io.IOException;
+
+import static spring_forum.utils.ExceptionMessages.AVATAR_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -24,9 +27,22 @@ public class ImageServiceImpl implements ImageService {
 
     private final CloseableHttpClient httpClient = HttpClients.createDefault();
 
+    @Value("${DEFAULT_AVATAR_MALE}")
+    private String DEFAULT_AVATAR_MALE;
+
+    @Value("${DEFAULT_AVATAR_FEMALE}")
+    private String DEFAULT_AVATAR_FEMALE;
+
     @Override
     public byte[] getImage(String url, Gender gender) {
         log.info("Getting image with url: " + url);
+        if (url == null) {
+            if (gender == Gender.M) {
+                return getImage(DEFAULT_AVATAR_MALE, gender);
+            } else {
+                return getImage(DEFAULT_AVATAR_FEMALE, gender);
+            }
+        }
         HttpGet httpGet = new HttpGet(url);
         httpGet.setHeader("Authorization", "Basic " + Secret.getBase64());
         try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
@@ -35,8 +51,8 @@ public class ImageServiceImpl implements ImageService {
             EntityUtils.consume(entity);
             return bytes;
         } catch (IOException e) {
-            log.warn("Cannot load avatar image from disk, setting default..");
-            return ImageUtils.getDefaultImage(gender);
+            log.warn("Cannot load avatar image from disk with url: " + url);
+            throw new NotFoundException(AVATAR_NOT_FOUND);
         }
     }
 
@@ -59,7 +75,8 @@ public class ImageServiceImpl implements ImageService {
         httpDelete.setHeader("Authorization", "Basic " + Secret.getBase64());
         try {
             httpClient.execute(httpDelete);
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            log.warn("Avatar wasn't deleted with url: " + url);
         }
     }
 }
