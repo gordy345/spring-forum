@@ -24,7 +24,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 @Slf4j
-@Profile({"test", "default"})
+@Profile({"test", "default", "dev"})
 @Component
 @RequiredArgsConstructor
 public class DataLoader implements ApplicationListener<ContextRefreshedEvent> {
