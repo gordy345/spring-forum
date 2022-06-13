@@ -103,4 +103,20 @@ public class TagErrorsTests {
                 .body(equalTo(TAG_NOT_FOUND_BY_ID + NEGATIVE_ID))
                 .statusCode(400);
     }
+
+    @Test
+    public void deleteTagPostNotExistsTest() {
+        given()
+                .when().delete(DEFAULT_URL + "/1/post/-1").then()
+                .body(equalTo(POST_NOT_FOUND_BY_ID + NEGATIVE_ID))
+                .statusCode(400);
+    }
+
+    @Test
+    public void deleteTagNotExistsForPostTest() {
+        given()
+                .when().delete(DEFAULT_URL + "/1/post/2").then()
+                .body(equalTo(POST_DOESNT_CONTAIN_TAG + 2))
+                .statusCode(400);
+    }
 }

@@ -56,6 +56,9 @@ public class TagServiceImpl implements TagService {
         log.info("Deleting tag with ID = " + tagId + " for post with ID = " + postId);
         Tag tag = findByID(tagId);
         Post post = postService.findByID(postId);
+        if (!post.getTags().contains(tag)) {
+            throw new NotFoundException(POST_DOESNT_CONTAIN_TAG + postId);
+        }
         post.getTags().remove(tag);
         if (tag.getPosts().size() == 1) {
             tagRepository.deleteById(tagId);
@@ -97,9 +100,12 @@ public class TagServiceImpl implements TagService {
         }
         cacheService.remove(TAGS_FOR_POST + post.getId(),
                 POSTS_BY_TAG + tag.getTag());
-        Tag savedTag = tagRepository.save(tag);
-        post.getTags().add(savedTag);
-        return savedTag;
+        Tag foundTag = tagRepository.findTagByTag(tag.getTag());
+        if (foundTag == null) {
+            foundTag = tagRepository.save(tag);
+        }
+        post.getTags().add(foundTag);
+        return foundTag;
     }
 
     @Override
